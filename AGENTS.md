@@ -31,7 +31,7 @@ Per project: `cd mcp-server && npm test` (builds first) or `cd firefox-extension
 Self distributed (unlisted) on addons.mozilla.org, updates through `updates.json` in this repo (`gecko.update_url`).
 
 1. `npm run bump -- X.Y.Z`, commit.
-2. `cd firefox-extension && npm run lint:amo` (must be clean), then `npm run sign` with `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET` set; it uploads the source archive of HEAD.
+2. `cd firefox-extension && npm run lint:amo` (must be clean), then `npm run sign` with the AMO API credentials in `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET` or in the macOS Keychain (`firemcp-amo-api-key`, `firemcp-amo-api-secret`); it uploads the source archive of HEAD.
 3. `npm run release:updates -- <signed .xpi>` in the root: adds the version to `updates.json` and stages `firemcp-X.Y.Z.xpi`.
 4. GitHub release `vX.Y.Z` with that XPI (the workflow adds the DXT), then commit and push `updates.json`.
 

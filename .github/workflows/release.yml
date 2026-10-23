@@ -29,13 +29,13 @@ jobs:
       run: npm install --prefix mcp-server
     
     - name: Build MCP server package
-      run: cd mcp-server && npm run pack-dxt -- firemcp-${{ github.event.release.tag_name }}.dxt
+      # Tags are v2.0.1, assets firemcp-2.0.1.dxt like the XPI.
+      run: cd mcp-server && TAG="${{ github.event.release.tag_name }}" && npm run pack-dxt -- "firemcp-${TAG#v}.dxt"
 
     - name: Upload package to release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release upload ${{ github.event.release.tag_name }} \
-          ./mcp-server/firemcp-${{ github.event.release.tag_name }}.dxt \
-          --clobber
+        TAG="${{ github.event.release.tag_name }}"
+        gh release upload "$TAG" "./mcp-server/firemcp-${TAG#v}.dxt" --clobber
 

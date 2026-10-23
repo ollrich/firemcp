@@ -13,7 +13,23 @@ import {
   getAuditLog,
   clearAuditLog,
   getToolNameById,
+  TAB_CHANGING_TOOLS,
+  DATA_COLLECTION_FOR_PERMISSION,
 } from "./extension-config";
+
+// Texts come from _locales (English, German) in the browser's language.
+const t = (key: string, ...substitutions: string[]): string =>
+  browser.i18n.getMessage(key, substitutions) || key;
+const toolText = (id: string, part: "name" | "description", fallback: string): string =>
+  browser.i18n.getMessage(`tool_${id.replace(/-/g, "_")}_${part}`) || fallback;
+
+function translatePage() {
+  document.documentElement.lang = browser.i18n.getUILanguage().split("-")[0];
+  document.title = t("optionsTitle");
+  document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((element) => {
+    element.textContent = t(element.dataset.i18n as string);
+  });
+}
 
 const secretDisplay = document.getElementById(
   "secret-display"
@@ -50,15 +66,13 @@ async function loadSecret() {
     if (secret) {
       secretDisplay.textContent = secret;
     } else {
-      secretDisplay.textContent =
-        "No secret found. Please reinstall the extension.";
+      secretDisplay.textContent = t("secretMissing");
       secretDisplay.style.color = "red";
       copyButton.disabled = true;
     }
   } catch (error) {
     console.error("Error loading secret:", error);
-    secretDisplay.textContent =
-      "Error loading secret. Please check console for details.";
+    secretDisplay.textContent = t("statusLoadFailed");
     secretDisplay.style.color = "red";
     copyButton.disabled = true;
   }
@@ -85,13 +99,13 @@ async function copyToClipboard(event: MouseEvent) {
     await navigator.clipboard.writeText(secret);
 
     // Show success message
-    statusElement.textContent = "Secret copied to clipboard!";
+    statusElement.textContent = t("statusCopied");
     setTimeout(() => {
       statusElement.textContent = "";
     }, 3000);
   } catch (error) {
     console.error("Error copying to clipboard:", error);
-    statusElement.textContent = "Failed to copy to clipboard";
+    statusElement.textContent = t("statusCopyFailed");
     statusElement.style.color = "red";
     setTimeout(() => {
       statusElement.textContent = "";
@@ -109,47 +123,58 @@ async function createToolSettingsUI() {
   // Clear existing content
   toolSettingsContainer.innerHTML = "";
 
-  // Create a toggle switch for each tool
-  AVAILABLE_TOOLS.forEach((tool) => {
-    const isEnabled = toolSettings[tool.id] !== false; // Default to true if not set
+  // Reading tools first, then the ones that change tabs, each under a heading.
+  const groups: [string, typeof AVAILABLE_TOOLS][] = [
+    ["toolsGroupRead", AVAILABLE_TOOLS.filter((tool) => !TAB_CHANGING_TOOLS.has(tool.id))],
+    ["toolsGroupTabs", AVAILABLE_TOOLS.filter((tool) => TAB_CHANGING_TOOLS.has(tool.id))],
+  ];
+  for (const [heading, tools] of groups) {
+    const title = document.createElement("h3");
+    title.textContent = t(heading);
+    toolSettingsContainer.appendChild(title);
+    tools.forEach((tool) => addToolRow(tool, toolSettings));
+  }
+}
 
-    const toolRow = document.createElement("div");
-    toolRow.className = "tool-row";
+function addToolRow(tool: (typeof AVAILABLE_TOOLS)[number], toolSettings: Record<string, boolean>) {
+  const isEnabled = toolSettings[tool.id] !== false; // Default to true if not set
 
-    const labelContainer = document.createElement("div");
-    labelContainer.className = "tool-label-container";
+  const toolRow = document.createElement("div");
+  toolRow.className = "tool-row";
 
-    const toolName = document.createElement("div");
-    toolName.className = "tool-name";
-    toolName.textContent = tool.name;
+  const labelContainer = document.createElement("div");
+  labelContainer.className = "tool-label-container";
 
-    const toolDescription = document.createElement("div");
-    toolDescription.className = "tool-description";
-    toolDescription.textContent = tool.description;
+  const toolName = document.createElement("div");
+  toolName.className = "tool-name";
+  toolName.textContent = toolText(tool.id, "name", tool.name);
 
-    labelContainer.appendChild(toolName);
-    labelContainer.appendChild(toolDescription);
+  const toolDescription = document.createElement("div");
+  toolDescription.className = "tool-description";
+  toolDescription.textContent = toolText(tool.id, "description", tool.description);
 
-    const toggleContainer = document.createElement("label");
-    toggleContainer.className = "toggle-switch";
+  labelContainer.appendChild(toolName);
+  labelContainer.appendChild(toolDescription);
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = isEnabled;
-    checkbox.dataset.toolId = tool.id;
-    checkbox.addEventListener("change", handleToolToggle);
+  const toggleContainer = document.createElement("label");
+  toggleContainer.className = "toggle-switch";
 
-    const slider = document.createElement("span");
-    slider.className = "slider";
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = isEnabled;
+  checkbox.dataset.toolId = tool.id;
+  checkbox.addEventListener("change", handleToolToggle);
 
-    toggleContainer.appendChild(checkbox);
-    toggleContainer.appendChild(slider);
+  const slider = document.createElement("span");
+  slider.className = "slider";
 
-    toolRow.appendChild(labelContainer);
-    toolRow.appendChild(toggleContainer);
+  toggleContainer.appendChild(checkbox);
+  toggleContainer.appendChild(slider);
 
-    toolSettingsContainer.appendChild(toolRow);
-  });
+  toolRow.appendChild(labelContainer);
+  toolRow.appendChild(toggleContainer);
+
+  toolSettingsContainer.appendChild(toolRow);
 }
 
 /**
@@ -186,8 +211,7 @@ async function loadDomainLists() {
     domainDenyListTextarea.value = denyList.join("\n");
   } catch (error) {
     console.error("Error loading domain lists:", error);
-    domainStatusElement.textContent =
-      "Error loading domain lists. Please check console for details.";
+    domainStatusElement.textContent = t("statusLoadFailed");
     domainStatusElement.style.color = "red";
     setTimeout(() => {
       domainStatusElement.textContent = "";
@@ -218,7 +242,7 @@ async function saveDomainLists(event: MouseEvent) {
     await setDomainDenyList(denyList);
 
     // Show success message
-    domainStatusElement.textContent = "Domain deny list saved successfully!";
+    domainStatusElement.textContent = t("statusSaved");
     domainStatusElement.style.color = "#4caf50";
     setTimeout(() => {
       domainStatusElement.textContent = "";
@@ -226,7 +250,7 @@ async function saveDomainLists(event: MouseEvent) {
     }, 3000);
   } catch (error) {
     console.error("Error saving domain lists:", error);
-    domainStatusElement.textContent = "Failed to save domain lists";
+    domainStatusElement.textContent = t("statusSaveFailed");
     domainStatusElement.style.color = "red";
     setTimeout(() => {
       domainStatusElement.textContent = "";
@@ -244,8 +268,7 @@ async function loadPorts() {
     portsInput.value = ports.join(", ");
   } catch (error) {
     console.error("Error loading ports:", error);
-    portsStatusElement.textContent =
-      "Error loading ports. Please check console for details.";
+    portsStatusElement.textContent = t("statusLoadFailed");
     portsStatusElement.style.color = "red";
     setTimeout(() => {
       portsStatusElement.textContent = "";
@@ -277,14 +300,14 @@ async function savePorts(event: MouseEvent) {
     for (const portStr of portStrings) {
       const port = parseInt(portStr, 10);
       if (isNaN(port) || port < 1 || port > 65535) {
-        throw new Error(`Invalid port number: ${portStr}. Ports must be between 1 and 65535.`);
+        throw new Error(t("portsInvalid", portStr));
       }
       ports.push(port);
     }
 
     // Ensure at least one port is provided
     if (ports.length === 0) {
-      throw new Error("At least one port must be specified.");
+      throw new Error(t("portsMissing"));
     }
 
     // Save to storage
@@ -294,7 +317,7 @@ async function savePorts(event: MouseEvent) {
     browser.runtime.reload();
   } catch (error) {
     console.error("Error saving ports:", error);
-    portsStatusElement.textContent = error instanceof Error ? error.message : "Failed to save ports";
+    portsStatusElement.textContent = error instanceof Error ? error.message : t("statusSaveFailed");
     portsStatusElement.style.color = "red";
     setTimeout(() => {
       portsStatusElement.textContent = "";
@@ -317,7 +340,7 @@ async function loadAuditLog() {
       // Show empty state
       const emptyDiv = document.createElement("div");
       emptyDiv.className = "audit-log-empty";
-      emptyDiv.textContent = "No tool usage recorded yet.";
+      emptyDiv.textContent = t("auditEmpty");
       auditLogContainer.appendChild(emptyDiv);
       return;
     }
@@ -330,7 +353,7 @@ async function loadAuditLog() {
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
     
-    const headers = ["Tool", "Timestamp", "Domain"];
+    const headers = [t("auditColTool"), t("auditColTime"), t("auditColSite")];
     headers.forEach(headerText => {
       const th = document.createElement("th");
       th.textContent = headerText;
@@ -349,7 +372,8 @@ async function loadAuditLog() {
       // Tool name
       const toolCell = document.createElement("td");
       toolCell.textContent =
-        getToolNameById(entry.toolId) + (entry.count && entry.count > 1 ? ` (×${entry.count})` : "");
+        toolText(entry.toolId, "name", getToolNameById(entry.toolId)) +
+        (entry.count && entry.count > 1 ? ` (×${entry.count})` : "");
       row.appendChild(toolCell);
       
       // Timestamp
@@ -384,7 +408,7 @@ async function loadAuditLog() {
     
   } catch (error) {
     console.error("Error loading audit log:", error);
-    auditLogContainer.innerHTML = '<div class="audit-log-empty">Error loading audit log. Please check console for details.</div>';
+    auditLogContainer.textContent = t("statusLoadFailed");
   }
 }
 
@@ -403,7 +427,7 @@ async function handleClearAuditLog(event: MouseEvent) {
     await loadAuditLog();
     
     // Show success message
-    auditLogStatusElement.textContent = "Audit log cleared successfully!";
+    auditLogStatusElement.textContent = t("statusCleared");
     auditLogStatusElement.style.color = "#4caf50";
     setTimeout(() => {
       auditLogStatusElement.textContent = "";
@@ -411,7 +435,7 @@ async function handleClearAuditLog(event: MouseEvent) {
     }, 3000);
   } catch (error) {
     console.error("Error clearing audit log:", error);
-    auditLogStatusElement.textContent = "Failed to clear audit log";
+    auditLogStatusElement.textContent = t("statusSaveFailed");
     auditLogStatusElement.style.color = "red";
     setTimeout(() => {
       auditLogStatusElement.textContent = "";
@@ -453,11 +477,9 @@ function showPermissionRequest(url: string) {
   const cancelBtn = document.getElementById("cancel-btn") as HTMLButtonElement;
   const permissionText = document.getElementById("permission-text") as HTMLParagraphElement;
 
-  // Set the domain in the modal
+  (document.getElementById("permission-title") as HTMLElement).textContent = t("consentTitleSite");
   domainElement.textContent = domain;
-  
-  // Update permission text for URL permission
-  permissionText.textContent = "This will allow the extension to interact with pages on this domain as requested by the MCP server.";
+  permissionText.textContent = t("consentTextSite");
 
   // Show modal and blur main content
   modal.classList.remove("hidden");
@@ -510,11 +532,9 @@ function showGlobalPermissionRequest(permissions: string[]) {
   const cancelBtn = document.getElementById("cancel-btn") as HTMLButtonElement;
   const permissionText = document.getElementById("permission-text") as HTMLParagraphElement;
 
-  // Set the permissions in the modal
-  domainElement.textContent = permissions.join(", ");
-  
-  // Update permission text for global permissions
-  permissionText.textContent = "This will allow the extension to use these browser capabilities as requested by the MCP server.";
+  (document.getElementById("permission-title") as HTMLElement).textContent = t("consentTitleFeature");
+  domainElement.textContent = "";
+  permissionText.textContent = permissions.map((permission) => t(`consentFeature_${permission}`)).join(" ");
 
   // Show modal and blur main content
   modal.classList.remove("hidden");
@@ -523,9 +543,12 @@ function showGlobalPermissionRequest(permissions: string[]) {
   // Handle grant permission button click
   const handleGrant = async () => {
     try {
+      const dataCollection = permissions.flatMap((permission) => DATA_COLLECTION_FOR_PERMISSION[permission] ?? []);
       const granted = await browser.permissions.request({
         permissions: permissions as browser.permissions.Permissions["permissions"],
-      });
+        // Not yet in @types/firefox-webext-browser.
+        ...(dataCollection.length ? { data_collection: dataCollection } : {}),
+      } as browser.permissions.Permissions);
 
       if (granted) {
         // Permission granted, close the window or redirect back
@@ -581,6 +604,7 @@ saveDomainListsButton.addEventListener("click", saveDomainLists);
 savePortsButton.addEventListener("click", savePorts);
 clearAuditLogButton.addEventListener("click", handleClearAuditLog);
 document.addEventListener("DOMContentLoaded", () => {
+  translatePage();
   loadSecret();
   createToolSettingsUI();
   loadDomainLists();

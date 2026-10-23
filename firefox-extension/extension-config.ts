@@ -11,9 +11,19 @@ const AUDIT_LOG_MERGE_WINDOW_MS = 60_000;
 // Define all available tools with their IDs and descriptions
 export interface ToolInfo {
   id: string;
+  // English fallback; the settings page shows the _locales text tool_<id>_name.
   name: string;
   description: string;
 }
+
+// Settings page groups: reading tools and tools that change tabs.
+export const TAB_CHANGING_TOOLS = new Set(["open-browser-tab", "close-browser-tabs", "reorder-browser-tabs", "find-highlight-in-browser-tab"]);
+
+// Optional data collection asked for together with an optional permission, so
+// Firefox's consent covers both (Firefox 140+).
+export const DATA_COLLECTION_FOR_PERMISSION: Record<string, string[]> = {
+  bookmarks: ["bookmarksInfo"],
+};
 
 export const AVAILABLE_TOOLS: ToolInfo[] = [
   {

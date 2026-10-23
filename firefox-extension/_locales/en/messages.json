@@ -1,0 +1,242 @@
+{
+  "extensionName": {
+    "message": "FireMCP"
+  },
+  "extensionDescription": {
+    "message": "Lets your AI assistant read Firefox through a local MCP server: tabs, page text, history, screenshots. Page content only with your consent per site. Can also open, close and arrange tabs; never clicks or types on pages."
+  },
+  "browserActionTitle": {
+    "message": "FireMCP: allow a screenshot of this tab"
+  },
+  "optionsTitle": {
+    "message": "FireMCP settings"
+  },
+  "optionsIntro": {
+    "message": "FireMCP lets your AI assistant (for example Claude) read your open tabs, page text, history and screenshots through a local MCP server on this computer. It reads page content only on sites you allow."
+  },
+  "sharesTitle": {
+    "message": "What FireMCP shares"
+  },
+  "sharesText": {
+    "message": "Only when your assistant asks: the list of open tabs, page text, history entries, bookmarks and screenshots. They go to the MCP server on this computer, which hands them to your assistant. FireMCP itself stores nothing but its settings and a short log of recent actions."
+  },
+  "sharesConsent": {
+    "message": "Reading a new site, your history or your bookmarks needs your OK once. Screenshots need a click on the FireMCP button on that tab. You can withdraw site access in Firefox under Add-ons, FireMCP, Permissions."
+  },
+  "setupTitle": {
+    "message": "Connect your assistant"
+  },
+  "setupIntro": {
+    "message": "FireMCP needs its MCP server on this computer."
+  },
+  "setupDesktopTitle": {
+    "message": "Claude Desktop"
+  },
+  "setupDesktopText": {
+    "message": "Install the extension file (.dxt) from the latest release and paste the secret key below into its settings."
+  },
+  "setupDesktopButton": {
+    "message": "Open the latest release"
+  },
+  "setupOtherTitle": {
+    "message": "Claude Code and other MCP clients"
+  },
+  "setupOtherText": {
+    "message": "Follow the installation guide."
+  },
+  "setupOtherButton": {
+    "message": "Installation guide"
+  },
+  "secretTitle": {
+    "message": "Secret key"
+  },
+  "secretText": {
+    "message": "Created when FireMCP was installed. The MCP server needs it to talk to FireMCP. Keep it private."
+  },
+  "secretCopy": {
+    "message": "Copy"
+  },
+  "secretMissing": {
+    "message": "No secret key found. Reinstall FireMCP."
+  },
+  "loading": {
+    "message": "Loading…"
+  },
+  "portsTitle": {
+    "message": "Ports"
+  },
+  "portsText": {
+    "message": "Ports the MCP server listens on, separated by commas (default 8089). Saving reloads FireMCP."
+  },
+  "portsSave": {
+    "message": "Save ports"
+  },
+  "portsInvalid": {
+    "message": "\"$1\" is not a valid port (1 to 65535)."
+  },
+  "portsMissing": {
+    "message": "Enter at least one port."
+  },
+  "toolsTitle": {
+    "message": "What your assistant may do"
+  },
+  "toolsText": {
+    "message": "Switch off anything FireMCP should not do."
+  },
+  "toolsGroupRead": {
+    "message": "Read"
+  },
+  "toolsGroupTabs": {
+    "message": "Open and arrange tabs"
+  },
+  "denyTitle": {
+    "message": "Blocked sites"
+  },
+  "denyText": {
+    "message": "FireMCP never reads or opens these sites and leaves them out of history and bookmark results. One domain per line; subdomains are included."
+  },
+  "denySave": {
+    "message": "Save"
+  },
+  "auditTitle": {
+    "message": "Recent actions"
+  },
+  "auditText": {
+    "message": "The last 100 actions. Identical actions within a minute are counted, not listed one by one."
+  },
+  "auditClear": {
+    "message": "Clear"
+  },
+  "auditColTool": {
+    "message": "Action"
+  },
+  "auditColTime": {
+    "message": "Time"
+  },
+  "auditColSite": {
+    "message": "Site"
+  },
+  "auditEmpty": {
+    "message": "Nothing yet."
+  },
+  "statusCopied": {
+    "message": "Copied."
+  },
+  "statusCopyFailed": {
+    "message": "Could not copy."
+  },
+  "statusSaved": {
+    "message": "Saved."
+  },
+  "statusSaveFailed": {
+    "message": "Could not save."
+  },
+  "statusLoadFailed": {
+    "message": "Could not load."
+  },
+  "statusCleared": {
+    "message": "Cleared."
+  },
+  "consentTitleSite": {
+    "message": "Allow FireMCP to read this site?"
+  },
+  "consentTextSite": {
+    "message": "Your AI assistant asked to read a page on this site. If you allow it, FireMCP reads page text here whenever your assistant asks. It never clicks or types. You can withdraw this in Firefox under Add-ons, FireMCP, Permissions."
+  },
+  "consentTitleFeature": {
+    "message": "Allow FireMCP to use this?"
+  },
+  "consentFeature_history": {
+    "message": "Browsing history: your assistant can search the pages you visited."
+  },
+  "consentFeature_bookmarks": {
+    "message": "Bookmarks: your assistant can search your bookmarks. Firefox calls this \"read and modify\"; FireMCP only reads."
+  },
+  "consentFeature_find": {
+    "message": "Find in page: your assistant can search and highlight text in a tab. Firefox calls this \"read the text of all open tabs\"."
+  },
+  "consentAllow": {
+    "message": "Allow"
+  },
+  "consentDeny": {
+    "message": "Not now"
+  },
+  "tool_open_browser_tab_name": {
+    "message": "Open tabs"
+  },
+  "tool_open_browser_tab_description": {
+    "message": "Open pages in new tabs, also to read them."
+  },
+  "tool_close_browser_tabs_name": {
+    "message": "Close tabs"
+  },
+  "tool_close_browser_tabs_description": {
+    "message": "Close tabs your assistant names."
+  },
+  "tool_get_list_of_open_tabs_name": {
+    "message": "List open tabs"
+  },
+  "tool_get_list_of_open_tabs_description": {
+    "message": "Titles and addresses of your open tabs."
+  },
+  "tool_get_tab_metadata_name": {
+    "message": "Tab details"
+  },
+  "tool_get_tab_metadata_description": {
+    "message": "State of a tab, such as loading, muted or pinned."
+  },
+  "tool_get_recent_browser_history_name": {
+    "message": "Browsing history"
+  },
+  "tool_get_recent_browser_history_description": {
+    "message": "Search the pages you visited. Asks for permission first."
+  },
+  "tool_get_tab_web_content_name": {
+    "message": "Read page content"
+  },
+  "tool_get_tab_web_content_description": {
+    "message": "Text of a page, used by all reading tools. Needs your consent per site."
+  },
+  "tool_reorder_browser_tabs_name": {
+    "message": "Arrange tabs"
+  },
+  "tool_reorder_browser_tabs_description": {
+    "message": "Change the order of tabs and group them."
+  },
+  "tool_find_highlight_in_browser_tab_name": {
+    "message": "Find in page"
+  },
+  "tool_find_highlight_in_browser_tab_description": {
+    "message": "Find and highlight text in a tab. Asks for permission first."
+  },
+  "tool_get_current_tab_name": {
+    "message": "Active tab"
+  },
+  "tool_get_current_tab_description": {
+    "message": "Which tab you are looking at."
+  },
+  "tool_read_page_meta_name": {
+    "message": "Page details"
+  },
+  "tool_read_page_meta_description": {
+    "message": "Title, description, structured data and headings of a page. Needs your consent per site."
+  },
+  "tool_read_selection_name": {
+    "message": "Selected text"
+  },
+  "tool_read_selection_description": {
+    "message": "The text you selected in a tab."
+  },
+  "tool_search_bookmarks_name": {
+    "message": "Bookmarks"
+  },
+  "tool_search_bookmarks_description": {
+    "message": "Search your bookmarks. Asks for permission first."
+  },
+  "tool_capture_tab_screenshot_name": {
+    "message": "Screenshots"
+  },
+  "tool_capture_tab_screenshot_description": {
+    "message": "Picture of the visible part of a tab, only after you click the FireMCP button on that tab."
+  }
+}

@@ -1,0 +1,242 @@
+{
+  "extensionName": {
+    "message": "FireMCP"
+  },
+  "extensionDescription": {
+    "message": "Lässt deinen KI-Assistenten Firefox über einen lokalen MCP-Server lesen: Tabs, Seitentext, Verlauf, Screenshots. Seiteninhalte nur mit deiner Zustimmung pro Website. Kann auch Tabs öffnen, schließen und ordnen, klickt und tippt aber nie auf Seiten."
+  },
+  "browserActionTitle": {
+    "message": "FireMCP: Screenshot dieses Tabs erlauben"
+  },
+  "optionsTitle": {
+    "message": "FireMCP Einstellungen"
+  },
+  "optionsIntro": {
+    "message": "FireMCP lässt deinen KI-Assistenten (zum Beispiel Claude) über einen lokalen MCP-Server auf diesem Computer deine offenen Tabs, Seitentexte, den Verlauf und Screenshots lesen. Seiteninhalte liest es nur auf Websites, die du erlaubt hast."
+  },
+  "sharesTitle": {
+    "message": "Was FireMCP weitergibt"
+  },
+  "sharesText": {
+    "message": "Nur wenn dein Assistent fragt: die Liste der offenen Tabs, Seitentexte, Verlaufseinträge, Lesezeichen und Screenshots. Sie gehen an den MCP-Server auf diesem Computer, der sie an deinen Assistenten weiterreicht. FireMCP selbst speichert nur seine Einstellungen und ein kurzes Protokoll der letzten Aktionen."
+  },
+  "sharesConsent": {
+    "message": "Eine neue Website, den Verlauf oder die Lesezeichen zu lesen, braucht einmal dein OK. Screenshots brauchen einen Klick auf den FireMCP-Button im jeweiligen Tab. Den Zugriff auf Websites nimmst du in Firefox unter Add-ons, FireMCP, Berechtigungen wieder zurück."
+  },
+  "setupTitle": {
+    "message": "Assistenten verbinden"
+  },
+  "setupIntro": {
+    "message": "FireMCP braucht seinen MCP-Server auf diesem Computer."
+  },
+  "setupDesktopTitle": {
+    "message": "Claude Desktop"
+  },
+  "setupDesktopText": {
+    "message": "Installiere die Erweiterungsdatei (.dxt) aus dem neuesten Release und trage den geheimen Schlüssel von unten in ihre Einstellungen ein."
+  },
+  "setupDesktopButton": {
+    "message": "Neuestes Release öffnen"
+  },
+  "setupOtherTitle": {
+    "message": "Claude Code und andere MCP-Clients"
+  },
+  "setupOtherText": {
+    "message": "Folge der Installationsanleitung."
+  },
+  "setupOtherButton": {
+    "message": "Installationsanleitung"
+  },
+  "secretTitle": {
+    "message": "Geheimer Schlüssel"
+  },
+  "secretText": {
+    "message": "Wurde bei der Installation von FireMCP erzeugt. Der MCP-Server braucht ihn, um mit FireMCP zu sprechen. Gib ihn nicht weiter."
+  },
+  "secretCopy": {
+    "message": "Kopieren"
+  },
+  "secretMissing": {
+    "message": "Kein geheimer Schlüssel gefunden. Installiere FireMCP neu."
+  },
+  "loading": {
+    "message": "Wird geladen…"
+  },
+  "portsTitle": {
+    "message": "Ports"
+  },
+  "portsText": {
+    "message": "Ports, auf denen der MCP-Server lauscht, durch Kommas getrennt (Standard 8089). Speichern lädt FireMCP neu."
+  },
+  "portsSave": {
+    "message": "Ports speichern"
+  },
+  "portsInvalid": {
+    "message": "„$1“ ist kein gültiger Port (1 bis 65535)."
+  },
+  "portsMissing": {
+    "message": "Gib mindestens einen Port an."
+  },
+  "toolsTitle": {
+    "message": "Was dein Assistent darf"
+  },
+  "toolsText": {
+    "message": "Schalte aus, was FireMCP nicht tun soll."
+  },
+  "toolsGroupRead": {
+    "message": "Lesen"
+  },
+  "toolsGroupTabs": {
+    "message": "Tabs öffnen und ordnen"
+  },
+  "denyTitle": {
+    "message": "Gesperrte Websites"
+  },
+  "denyText": {
+    "message": "FireMCP liest und öffnet diese Websites nie und lässt sie bei Verlauf und Lesezeichen weg. Eine Domain pro Zeile, Subdomains sind eingeschlossen."
+  },
+  "denySave": {
+    "message": "Speichern"
+  },
+  "auditTitle": {
+    "message": "Letzte Aktionen"
+  },
+  "auditText": {
+    "message": "Die letzten 100 Aktionen. Gleiche Aktionen innerhalb einer Minute werden gezählt statt einzeln aufgeführt."
+  },
+  "auditClear": {
+    "message": "Leeren"
+  },
+  "auditColTool": {
+    "message": "Aktion"
+  },
+  "auditColTime": {
+    "message": "Zeit"
+  },
+  "auditColSite": {
+    "message": "Website"
+  },
+  "auditEmpty": {
+    "message": "Noch nichts."
+  },
+  "statusCopied": {
+    "message": "Kopiert."
+  },
+  "statusCopyFailed": {
+    "message": "Kopieren fehlgeschlagen."
+  },
+  "statusSaved": {
+    "message": "Gespeichert."
+  },
+  "statusSaveFailed": {
+    "message": "Speichern fehlgeschlagen."
+  },
+  "statusLoadFailed": {
+    "message": "Konnte nicht geladen werden."
+  },
+  "statusCleared": {
+    "message": "Geleert."
+  },
+  "consentTitleSite": {
+    "message": "Darf FireMCP diese Website lesen?"
+  },
+  "consentTextSite": {
+    "message": "Dein KI-Assistent möchte eine Seite dieser Website lesen. Wenn du zustimmst, liest FireMCP hier Seitentext, sobald dein Assistent fragt. Es klickt und tippt nie. Zurücknehmen kannst du das in Firefox unter Add-ons, FireMCP, Berechtigungen."
+  },
+  "consentTitleFeature": {
+    "message": "Darf FireMCP das nutzen?"
+  },
+  "consentFeature_history": {
+    "message": "Verlauf: Dein Assistent kann die besuchten Seiten durchsuchen."
+  },
+  "consentFeature_bookmarks": {
+    "message": "Lesezeichen: Dein Assistent kann deine Lesezeichen durchsuchen. Firefox nennt das „lesen und ändern“, FireMCP liest nur."
+  },
+  "consentFeature_find": {
+    "message": "Suchen auf der Seite: Dein Assistent kann Text in einem Tab suchen und markieren. Firefox nennt das „Text aller geöffneten Tabs lesen“."
+  },
+  "consentAllow": {
+    "message": "Erlauben"
+  },
+  "consentDeny": {
+    "message": "Nicht jetzt"
+  },
+  "tool_open_browser_tab_name": {
+    "message": "Tabs öffnen"
+  },
+  "tool_open_browser_tab_description": {
+    "message": "Seiten in neuen Tabs öffnen, auch um sie zu lesen."
+  },
+  "tool_close_browser_tabs_name": {
+    "message": "Tabs schließen"
+  },
+  "tool_close_browser_tabs_description": {
+    "message": "Tabs schließen, die dein Assistent nennt."
+  },
+  "tool_get_list_of_open_tabs_name": {
+    "message": "Offene Tabs auflisten"
+  },
+  "tool_get_list_of_open_tabs_description": {
+    "message": "Titel und Adressen deiner offenen Tabs."
+  },
+  "tool_get_tab_metadata_name": {
+    "message": "Tab-Details"
+  },
+  "tool_get_tab_metadata_description": {
+    "message": "Zustand eines Tabs, etwa lädt, stumm oder angeheftet."
+  },
+  "tool_get_recent_browser_history_name": {
+    "message": "Verlauf"
+  },
+  "tool_get_recent_browser_history_description": {
+    "message": "Besuchte Seiten durchsuchen. Fragt vorher um Erlaubnis."
+  },
+  "tool_get_tab_web_content_name": {
+    "message": "Seiteninhalt lesen"
+  },
+  "tool_get_tab_web_content_description": {
+    "message": "Text einer Seite, für alle Lesewerkzeuge. Braucht deine Zustimmung pro Website."
+  },
+  "tool_reorder_browser_tabs_name": {
+    "message": "Tabs ordnen"
+  },
+  "tool_reorder_browser_tabs_description": {
+    "message": "Reihenfolge der Tabs ändern und sie gruppieren."
+  },
+  "tool_find_highlight_in_browser_tab_name": {
+    "message": "Auf der Seite suchen"
+  },
+  "tool_find_highlight_in_browser_tab_description": {
+    "message": "Text in einem Tab suchen und markieren. Fragt vorher um Erlaubnis."
+  },
+  "tool_get_current_tab_name": {
+    "message": "Aktiver Tab"
+  },
+  "tool_get_current_tab_description": {
+    "message": "Welchen Tab du gerade ansiehst."
+  },
+  "tool_read_page_meta_name": {
+    "message": "Seitendetails"
+  },
+  "tool_read_page_meta_description": {
+    "message": "Titel, Beschreibung, strukturierte Daten und Überschriften einer Seite. Braucht deine Zustimmung pro Website."
+  },
+  "tool_read_selection_name": {
+    "message": "Markierter Text"
+  },
+  "tool_read_selection_description": {
+    "message": "Der Text, den du in einem Tab markiert hast."
+  },
+  "tool_search_bookmarks_name": {
+    "message": "Lesezeichen"
+  },
+  "tool_search_bookmarks_description": {
+    "message": "Deine Lesezeichen durchsuchen. Fragt vorher um Erlaubnis."
+  },
+  "tool_capture_tab_screenshot_name": {
+    "message": "Screenshots"
+  },
+  "tool_capture_tab_screenshot_description": {
+    "message": "Bild vom sichtbaren Teil eines Tabs, nur nachdem du im Tab auf den FireMCP-Button geklickt hast."
+  }
+}

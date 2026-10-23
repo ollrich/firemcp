@@ -318,6 +318,21 @@ describe("MessageHandler", () => {
     });
 
     describe("get-browser-recent-history command", () => {
+      beforeEach(() => {
+        (browser.permissions.contains as jest.Mock).mockResolvedValue(true);
+      });
+
+      it("should ask for the history permission on first use", async () => {
+        (browser.permissions.contains as jest.Mock).mockResolvedValue(false);
+        (browser.runtime.getURL as jest.Mock).mockReturnValue("moz-extension://x/options.html");
+
+        await expect(
+          messageHandler.handleDecodedMessage({ cmd: "get-browser-recent-history", correlationId: "h" })
+        ).rejects.toThrow(/following operations: history/);
+        expect(browser.permissions.contains).toHaveBeenCalledWith({ permissions: ["history"] });
+        expect(browser.history.search).not.toHaveBeenCalled();
+      });
+
       it("should get history items and send them to the server", async () => {
         // Arrange
         const request: ServerMessageRequest = {
@@ -397,6 +412,25 @@ describe("MessageHandler", () => {
         expect(mockClient.sendResourceToServer).toHaveBeenCalledWith({
           resource: "history",
           correlationId: "test-correlation-id",
+          historyItems: [{ url: "https://example.com", title: "Example" }],
+        });
+      });
+
+      it("should leave out sites on the deny list", async () => {
+        const config = (await browser.storage.local.get("config")).config;
+        (browser.storage.local.get as jest.Mock).mockResolvedValue({
+          config: { ...config, domainDenyList: ["bank.example"] },
+        });
+        (browser.history.search as jest.Mock).mockResolvedValue([
+          { url: "https://online.bank.example/login", title: "Bank" },
+          { url: "https://example.com", title: "Example" },
+        ]);
+
+        await messageHandler.handleDecodedMessage({ cmd: "get-browser-recent-history", correlationId: "d" });
+
+        expect(mockClient.sendResourceToServer).toHaveBeenCalledWith({
+          resource: "history",
+          correlationId: "d",
           historyItems: [{ url: "https://example.com", title: "Example" }],
         });
       });
@@ -836,6 +870,19 @@ describe("MessageHandler", () => {
           resource: "bookmarks",
           correlationId: "c3",
           items: [{ title: "Paper", url: "https://papers.example/1", folder: "Bookmarks Menu / Research", dateAdded: 5 }],
+        });
+      });
+
+      it("should ask for bookmarks together with the optional bookmark data", async () => {
+        (browser.permissions.contains as jest.Mock).mockResolvedValue(false);
+        (browser.runtime.getURL as jest.Mock).mockReturnValue("moz-extension://x/options.html");
+
+        await expect(
+          messageHandler.handleDecodedMessage({ cmd: "search-bookmarks", query: "x", correlationId: "c5" })
+        ).rejects.toThrow(/bookmarks/);
+        expect(browser.permissions.contains).toHaveBeenCalledWith({
+          permissions: ["bookmarks"],
+          data_collection: ["bookmarksInfo"],
         });
       });
 

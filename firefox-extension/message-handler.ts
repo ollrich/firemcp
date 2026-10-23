@@ -3,7 +3,13 @@ import type {
   TabContentExtensionMessage,
 } from "@browser-control-mcp/common";
 import { WebsocketClient } from "./client";
-import { isCommandAllowed, isDomainInDenyList, COMMAND_TO_TOOL_ID, addAuditLogEntry } from "./extension-config";
+import {
+  isCommandAllowed,
+  isDomainInDenyList,
+  COMMAND_TO_TOOL_ID,
+  addAuditLogEntry,
+  DATA_COLLECTION_FOR_PERMISSION,
+} from "./extension-config";
 import { hasCaptureConsent, markTabAsAwaitingConsent } from "./capture-consent";
 import { collectPageMeta, collectSelection, pageToMarkdown, visibleText } from "./page-scripts";
 
@@ -203,14 +209,17 @@ export class MessageHandler {
     correlationId: string,
     searchQuery: string | null = null
   ): Promise<void> {
+    // Optional since 2.1.0: asked for on first use instead of at install.
+    await this.checkForGlobalPermission(["history"]);
     const historyItems = await browser.history.search({
       text: searchQuery ?? "", // Search for all URLs (empty string matches everything)
       maxResults: 200, // Limit to 200 results
       startTime: 0, // Search from the beginning of time
     });
-    const filteredHistoryItems = historyItems.filter((item) => {
-      return !!item.url;
-    });
+    const filteredHistoryItems = [];
+    for (const item of historyItems) {
+      if (item.url && !(await isDomainInDenyList(item.url))) filteredHistoryItems.push(item);
+    }
     await this.client.sendResourceToServer({
       resource: "history",
       correlationId,
@@ -261,9 +270,12 @@ export class MessageHandler {
   }
 
   private async checkForGlobalPermission(permissions: string[]): Promise<void> {
+    const dataCollection = permissions.flatMap((permission) => DATA_COLLECTION_FOR_PERMISSION[permission] ?? []);
     const granted = await browser.permissions.contains({
       permissions,
-    });
+      // Not yet in @types/firefox-webext-browser.
+      ...(dataCollection.length ? { data_collection: dataCollection } : {}),
+    } as browser.permissions.Permissions);
 
     if (!granted) {
       // Open the options page with a URL parameter to request permission:

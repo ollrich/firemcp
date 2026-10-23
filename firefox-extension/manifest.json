@@ -1,8 +1,11 @@
 {
     "manifest_version": 2,
-    "name": "FireMCP",
-    "version": "2.0.1",
-    "description": "Lets a local MCP server read your Firefox tabs, pages and history for AI assistants, with consent per domain. Read only.",
+    "name": "__MSG_extensionName__",
+    "version": "2.1.0",
+    "description": "__MSG_extensionDescription__",
+    "default_locale": "en",
+    "author": "Oliver Eichhof",
+    "homepage_url": "https://github.com/ollrich/firemcp",
     "icons": {
         "16": "icons/icon-16.png",
         "32": "icons/icon-32.png",
@@ -13,13 +16,13 @@
     "permissions": [
         "tabs",
         "tabGroups",
-        "history",
         "storage",
         "activeTab"
     ],
     "optional_permissions": [
         "*://*/*",
         "find",
+        "history",
         "bookmarks"
     ],
     "background": {
@@ -29,7 +32,7 @@
     },
     "browser_action": {
         "default_icon": "assets/screenshot.svg",
-        "default_title": "FireMCP: allow a screenshot of this tab"
+        "default_title": "__MSG_browserActionTitle__"
     },
     "options_ui": {
         "page": "options.html"
@@ -42,7 +45,9 @@
             "data_collection_permissions": {
                 "required": [
                     "browsingActivity",
-                    "websiteContent",
+                    "websiteContent"
+                ],
+                "optional": [
                     "bookmarksInfo"
                 ]
             }

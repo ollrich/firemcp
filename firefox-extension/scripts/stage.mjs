@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const extensionDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const buildDir = path.join(extensionDir, "build");
-const shipped = ["manifest.json", "options.html", "assets", "icons", "dist/background.js", "dist/options.js"];
+const shipped = ["manifest.json", "_locales", "options.html", "assets", "icons", "dist/background.js", "dist/options.js"];
 
 fs.rmSync(buildDir, { recursive: true, force: true });
 for (const entry of shipped) {

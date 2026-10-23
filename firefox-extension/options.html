@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>FireMCP Options</title>
+  <title>FireMCP</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -324,117 +324,99 @@
 </head>
 
 <body>
-  <!-- Permission Request Modal -->
+  <!-- Consent dialog; texts are set by options.ts from _locales -->
   <div id="permission-modal" class="permission-modal hidden">
     <div class="permission-modal-content">
-      <h2>Permission Required</h2>
-      <p>The FireMCP extension needs permission to access:</p>
+      <h2 id="permission-title"></h2>
       <div class="permission-domain" id="permission-domain"></div>
-      <p id="permission-text">This will allow the extension to interact with pages on this domain as requested by the MCP server.</p>
+      <p id="permission-text"></p>
       <div class="permission-buttons">
-        <button id="grant-btn" class="grant-button">Grant Permission</button>
-        <button id="cancel-btn" class="cancel-button">Cancel</button>
+        <button id="grant-btn" class="grant-button" data-i18n="consentAllow"></button>
+        <button id="cancel-btn" class="cancel-button" data-i18n="consentDeny"></button>
       </div>
     </div>
   </div>
 
   <div class="container main-content" id="main-content">
-    <h1>FireMCP Options</h1>
-    <p>Configure settings for the FireMCP extension.</p>
+    <h1 data-i18n="optionsTitle"></h1>
+    <p data-i18n="optionsIntro"></p>
 
     <div class="section-container">
-      <h2>MCP Server Installation</h2>
+      <h2 data-i18n="sharesTitle"></h2>
       <div class="section-content">
-        <p>To use this extension, you need to install the local MCP server. Choose one of the following options:</p>
-        
-        <div style="margin: 15px 0;">
-          <h3 style="margin: 10px 0; font-size: 16px; color: #333;">Option 1: Download DXT Package (Claude Desktop only)</h3>
-          <p>Download the DXT package from the latest release and open it:</p>
-          <a href="https://github.com/ollrich/firemcp/releases/latest" target="_blank" rel="noopener noreferrer"
-             style="display: inline-block; background-color: #4285f4; color: white; padding: 8px 16px; 
-                    text-decoration: none; border-radius: 4px; margin: 5px 0; font-size: 14px;">
-            Download DXT Package
-          </a>
-        </div>
-        
-        <div style="margin: 15px 0;">
-          <h3 style="margin: 10px 0; font-size: 16px; color: #333;">Option 2: Manual MCP Installation</h3>
-          <p>Follow the detailed setup instructions in the github repository:</p>
-          <a href="https://github.com/ollrich/firemcp?tab=readme-ov-file#installation" 
-             target="_blank" rel="noopener noreferrer"
-             style="display: inline-block; background-color: #f1f3f4; color: #333; padding: 8px 16px; 
-                    text-decoration: none; border-radius: 4px; border: 1px solid #dadce0; margin: 5px 0; font-size: 14px;">
-            View Installation Guide
-          </a>
-        </div>
-        
-        <p style="margin-top: 15px; color: #666; font-size: 14px;">
-          After installing the MCP server, you'll need to configure it with the secret key shown below.
-        </p>
+        <p data-i18n="sharesText"></p>
+        <p data-i18n="sharesConsent"></p>
       </div>
     </div>
 
     <div class="section-container">
-      <h2>Secret Key</h2>
+      <h2 data-i18n="setupTitle"></h2>
       <div class="section-content">
-        <p>This secret key is automatically generated when the extension is installed and is used to authenticate
-          connections to the MCP server:</p>
-        <div class="secret-value" id="secret-display">Loading...</div>
-        <button class="copy-button" id="copy-button">Copy to Clipboard</button>
+        <p data-i18n="setupIntro"></p>
+        <div style="margin: 15px 0;">
+          <h3 style="margin: 10px 0; font-size: 16px; color: #333;" data-i18n="setupDesktopTitle"></h3>
+          <p data-i18n="setupDesktopText"></p>
+          <a href="https://github.com/ollrich/firemcp/releases/latest" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #4285f4; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin: 5px 0; font-size: 14px;" data-i18n="setupDesktopButton"></a>
+        </div>
+        <div style="margin: 15px 0;">
+          <h3 style="margin: 10px 0; font-size: 16px; color: #333;" data-i18n="setupOtherTitle"></h3>
+          <p data-i18n="setupOtherText"></p>
+          <a href="https://github.com/ollrich/firemcp?tab=readme-ov-file#installation" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #f1f3f4; color: #333; padding: 8px 16px; text-decoration: none; border-radius: 4px; border: 1px solid #dadce0; margin: 5px 0; font-size: 14px;" data-i18n="setupOtherButton"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-container">
+      <h2 data-i18n="secretTitle"></h2>
+      <div class="section-content">
+        <p data-i18n="secretText"></p>
+        <div class="secret-value" id="secret-display" data-i18n="loading"></div>
+        <button class="copy-button" id="copy-button" data-i18n="secretCopy"></button>
         <div class="status" id="status"></div>
       </div>
     </div>
 
     <div class="section-container">
-      <h2>WebSocket Ports</h2>
+      <h2 data-i18n="toolsTitle"></h2>
       <div class="section-content">
-        <p>Configure the WebSocket ports for MCP server connections (comma-separated list). Note: Changing this value will reload the extension.</p>
-        <input type="text" id="ports-input" placeholder="8089, 8090, 8091" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 10px;" />
-        <button class="copy-button" id="save-ports">Save Ports</button>
-        <div class="status" id="ports-status"></div>
-      </div>
-    </div>
-
-    <div class="section-container">
-      <h2>Tool Permissions</h2>
-      <div class="section-content">
-        <p>Enable or disable specific MCP tools that can interact with your browser:</p>
+        <p data-i18n="toolsText"></p>
         <div id="tool-settings-container">
-          <!-- Tool settings will be dynamically inserted here -->
-          <div class="loading">Loading tool settings...</div>
+          <div class="loading" data-i18n="loading"></div>
         </div>
       </div>
     </div>
 
     <div class="section-container">
-      <h2 class="collapsed" role="button" aria-expanded="false" tabindex="0" id="domain-filtering-header">Domain Filtering</h2>
+      <h2 class="collapsed" role="button" aria-expanded="false" tabindex="0" id="domain-filtering-header" data-i18n="denyTitle"></h2>
       <div class="section-content collapsed" aria-labelledby="domain-filtering-header">
-        <p>Configure which domains the extension can interact with:</p>
-
-        <div class="domain-list-container" style="margin-top: 20px;">
-          <h3>Domain Deny List</h3>
-          <p>The extension will not open tabs or get content from tabs with these domains (one domain per line):</p>
-          <textarea id="domain-deny-list" rows="6" style="width: 100%; font-family: monospace;"></textarea>
-        </div>
-
-        <button id="save-domain-lists" class="copy-button" style="margin-top: 15px;">Save Domain Lists</button>
+        <p data-i18n="denyText"></p>
+        <textarea id="domain-deny-list" rows="6" style="width: 100%; font-family: monospace; margin-top: 10px;"></textarea>
+        <button id="save-domain-lists" class="copy-button" style="margin-top: 15px;" data-i18n="denySave"></button>
         <div class="status" id="domain-status"></div>
       </div>
     </div>
 
     <div class="section-container">
-      <h2 class="collapsed" role="button" aria-expanded="false" tabindex="0" id="audit-log-header">Audit Log</h2>
+      <h2 class="collapsed" role="button" aria-expanded="false" tabindex="0" id="audit-log-header" data-i18n="auditTitle"></h2>
       <div class="section-content collapsed" aria-labelledby="audit-log-header">
-        <p>View recent tool usage history:</p>
-        
+        <p data-i18n="auditText"></p>
         <div id="audit-log-container" style="margin-top: 20px;">
-          <div class="loading">Loading audit log...</div>
+          <div class="loading" data-i18n="loading"></div>
         </div>
-
         <div style="margin-top: 15px;">
-          <button id="clear-audit-log" class="copy-button">Clear Log</button>
+          <button id="clear-audit-log" class="copy-button" data-i18n="auditClear"></button>
           <div class="status" id="audit-log-status"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="section-container">
+      <h2 class="collapsed" role="button" aria-expanded="false" tabindex="0" id="ports-header" data-i18n="portsTitle"></h2>
+      <div class="section-content collapsed" aria-labelledby="ports-header">
+        <p data-i18n="portsText"></p>
+        <input type="text" id="ports-input" placeholder="8089" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; margin-bottom: 10px;" />
+        <button class="copy-button" id="save-ports" data-i18n="portsSave"></button>
+        <div class="status" id="ports-status"></div>
       </div>
     </div>
   </div>

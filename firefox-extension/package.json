@@ -1,6 +1,6 @@
 {
   "name": "firemcp-extension",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "dist/background.js",
   "scripts": {
     "build": "npm run build:js && npm run package:xpi",

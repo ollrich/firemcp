@@ -13,7 +13,7 @@ const mockBrowser = {
     group: jest.fn(),
     captureVisibleTab: jest.fn(),
     onUpdated: { addListener: jest.fn() },
-    onRemoved: { addListener: jest.fn() },
+    onRemoved: { addListener: jest.fn(), removeListener: jest.fn() },
   },
   browserAction: {
     setBadgeText: jest.fn().mockResolvedValue(undefined),

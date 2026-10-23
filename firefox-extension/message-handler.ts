@@ -14,6 +14,9 @@ const TAB_PAINT_DELAY_MS = 250;
 // JSON-LD can be large (shops, recipes); keep the page meta response small.
 const MAX_JSON_LD_LENGTH = 20_000;
 const DEFAULT_BOOKMARK_LIMIT = 50;
+// Left out with mainContentOnly: menus, sidebars and search boxes, which many
+// sites (Wikipedia among them) put inside <main>.
+const LANDMARKS_OUTSIDE_CONTENT = "nav, aside, [role=navigation], [role=complementary], [role=search]";
 
 export class MessageHandler {
   private client: WebsocketClient;
@@ -232,12 +235,29 @@ export class MessageHandler {
           url
         )}`;
 
-        await browser.tabs.create({ url: urlWithParams });
+        await this.openConsentPage(urlWithParams);
         throw new Error(
           `The user has not yet granted permission to access the domain "${origin}". A dialog is now being opened to request permission. If the user grants permission, you can try the request again.`
         );
       }
     }
+  }
+
+  // The consent page closes itself once the user grants access. Firefox would then
+  // show the neighbouring tab, often a page the server just opened in the
+  // background, so go back to the tab the user was on.
+  private async openConsentPage(url: string): Promise<void> {
+    const [previous] = (await browser.tabs.query({ active: true, currentWindow: true })) ?? [];
+    const consentTab = await browser.tabs.create({ url });
+    if (previous?.id === undefined || consentTab?.id === undefined) {
+      return;
+    }
+    const onRemoved = (tabId: number) => {
+      if (tabId !== consentTab.id) return;
+      browser.tabs.onRemoved.removeListener(onRemoved);
+      browser.tabs.update(previous.id as number, { active: true }).catch(() => undefined);
+    };
+    browser.tabs.onRemoved.addListener(onRemoved);
   }
 
   private async checkForGlobalPermission(permissions: string[]): Promise<void> {
@@ -252,7 +272,7 @@ export class MessageHandler {
         JSON.stringify(permissions)
       )}`;
 
-      await browser.tabs.create({ url: urlWithParams });
+      await this.openConsentPage(urlWithParams);
       throw new Error(
         `The user has not yet granted permission for the following operations: ${permissions.join(
           ", "
@@ -289,7 +309,10 @@ export class MessageHandler {
 
         const scope = ${JSON.stringify({
           selector: scope.selector || null,
-          exclude: scope.excludeSelector || null,
+          exclude:
+            [scope.excludeSelector, scope.mainContentOnly ? LANDMARKS_OUTSIDE_CONTENT : null]
+              .filter(Boolean)
+              .join(", ") || null,
           mainContentOnly: scope.mainContentOnly === true,
         })};
         const root = scope.selector

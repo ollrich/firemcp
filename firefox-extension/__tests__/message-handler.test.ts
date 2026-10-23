@@ -696,6 +696,7 @@ describe("MessageHandler", () => {
         const code = (browser.tabs.executeScript as jest.Mock).mock.calls[0][1].code as string;
         expect(code).toContain("function pageToMarkdown");
         expect(code).toContain('"mainContentOnly":true');
+        expect(code).toContain('"exclude":"nav, aside, [role=navigation], [role=complementary], [role=search]"');
         expect(code).toContain(")(root, scope.exclude, true)");
         expect((mockClient.sendResourceToServer as jest.Mock).mock.calls[0][0].format).toBe("markdown");
       });
@@ -729,6 +730,26 @@ describe("MessageHandler", () => {
             correlationId: "test-correlation-id",
           })
         ).rejects.toThrow('No element matches the selector "#nothing"');
+      });
+
+      it("should return to the user's tab when the consent page closes", async () => {
+        (browser.tabs.get as jest.Mock).mockResolvedValue({ id: 123, url: "https://new.example" });
+        (browser.permissions.contains as jest.Mock).mockResolvedValue(false);
+        (browser.runtime.getURL as jest.Mock).mockReturnValue("moz-extension://x/options.html");
+        (browser.tabs.query as jest.Mock).mockResolvedValue([{ id: 9 }]);
+        (browser.tabs.create as jest.Mock).mockResolvedValue({ id: 50 });
+        (browser.tabs.update as jest.Mock).mockResolvedValue({});
+
+        await expect(
+          messageHandler.handleDecodedMessage({ cmd: "get-tab-content", tabId: 123, correlationId: "c" })
+        ).rejects.toThrow(/not yet granted permission/);
+
+        const onRemoved = (browser.tabs.onRemoved.addListener as jest.Mock).mock.calls[0][0];
+        onRemoved(77);
+        expect(browser.tabs.update).not.toHaveBeenCalled();
+        onRemoved(50);
+        expect(browser.tabs.update).toHaveBeenCalledWith(9, { active: true });
+        expect(browser.tabs.onRemoved.removeListener).toHaveBeenCalledWith(onRemoved);
       });
 
       it("should skip collecting links when includeLinks is false", async () => {

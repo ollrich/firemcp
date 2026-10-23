@@ -37,7 +37,7 @@ function readPackageVersion(): string {
 }
 
 const mcpServer = new McpServer({
-  name: "BrowserControl",
+  name: "FireMCP",
   version: readPackageVersion(),
 });
 
@@ -1243,7 +1243,7 @@ if (toolProfile !== "all" && toolProfile !== "read") {
     .map((entry) => entry.trim())
     .filter((entry) => entry && !knownToolNames.includes(entry));
   if (unknown.length) {
-    console.error(`browser-control: BROWSER_MCP_TOOLS names unknown tools: ${unknown.join(", ")}`);
+    console.error(`firemcp: BROWSER_MCP_TOOLS names unknown tools: ${unknown.join(", ")}`);
   }
 }
 

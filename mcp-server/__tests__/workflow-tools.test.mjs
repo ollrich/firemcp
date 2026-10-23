@@ -95,7 +95,7 @@ function startFakeExtension(port, state) {
           state.tabs.push({
             id: state.nextId++,
             url: `moz-extension://fake-uuid/options.html?requestUrl=${encodeURIComponent(tab.url)}`,
-            title: "Browser Control MCP",
+            title: "FireMCP",
             status: "complete",
             lastAccessed: Date.now(),
           });

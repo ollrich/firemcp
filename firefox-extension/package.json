@@ -1,15 +1,15 @@
 {
-  "name": "firefox-extension",
-  "version": "1.6.1",
+  "name": "firemcp-extension",
+  "version": "2.0.0",
   "main": "dist/background.js",
   "scripts": {
     "build": "npm run build:js && npm run package:xpi",
     "build:js": "esbuild background.ts --bundle --outfile=dist/background.js && esbuild options.ts --bundle --outfile=dist/options.js",
-    "package:xpi": "mkdir -p web-ext-artifacts && rm -f web-ext-artifacts/browser-control-mcp-$npm_package_version.xpi && zip -r web-ext-artifacts/browser-control-mcp-$npm_package_version.xpi manifest.json options.html assets icons dist/background.js dist/options.js",
+    "package:xpi": "mkdir -p web-ext-artifacts && rm -f web-ext-artifacts/firemcp-$npm_package_version.xpi && zip -r web-ext-artifacts/firemcp-$npm_package_version.xpi manifest.json options.html assets icons dist/background.js dist/options.js",
     "test": "jest"
   },
   "license": "MIT",
-  "description": "Browser Control MCP Firefox Extension / Add-on",
+  "description": "FireMCP Firefox add-on",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "esbuild": "0.25.1",

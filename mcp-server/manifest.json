@@ -1,24 +1,26 @@
 {
     "dxt_version": "0.1",
-    "name": "browser-control-firefox",
-    "version": "1.6.1-ollie.7",
-    "display_name": "Firefox Control",
-    "description": "Control Mozilla Firefox: tabs, history and web content (privacy aware). Fork with one step read tools.",
-    "long_description": "This MCP server provides AI assistants with access to the browser's tab management, browsing history, page search, and webpage text content through a local MCP (Model Context Protocol) connection.\n\nBefore accessing any webpage content, explicit user consent is required for each domain through browser-side permissions.\n\n**Note:** This extension requires a separate Firefox add-on component, which is available at [https://addons.mozilla.org/en-US/firefox/addon/browser-control-mcp/](https://addons.mozilla.org/en-US/firefox/addon/browser-control-mcp/). Start by installing the Firefox add-on, then copy the secret key from the add-on settings page (it will open automatically) and paste it into this extension's configuration.",
+    "name": "firemcp",
+    "version": "2.0.0",
+    "display_name": "FireMCP",
+    "description": "Read your Firefox from Claude: tabs, live rendered pages, search in pages, history and screenshots. Read only, with consent per domain.",
+    "long_description": "FireMCP gives AI assistants read access to your real Firefox through a local MCP connection: open tabs, live rendered pages (including script heavy sites), search within pages, browsing history and screenshots. It reads only; it does not click, type or run scripts.\n\nPage content needs your consent per domain in Firefox, screenshots your consent per tab. Several MCP clients can share one browser connection.\n\n**Note:** This extension needs the FireMCP Firefox add-on, see [github.com/ollrich/firemcp](https://github.com/ollrich/firemcp). It also works with the original \"Browser Control MCP\" add-on from addons.mozilla.org, with fewer features. Copy the secret key from the add-on's settings page into this extension's configuration.",
     "author": {
-        "name": "eyalzh",
-        "url": "https://github.com/eyalzh"
+        "name": "Oliver Eichhof",
+        "url": "https://github.com/ollrich"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/eyalzh/browser-control-mcp"
+        "url": "https://github.com/ollrich/firemcp"
     },
-    "support": "https://github.com/eyalzh/browser-control-mcp/issues",
-    "documentation": "https://github.com/eyalzh/browser-control-mcp",
+    "support": "https://github.com/ollrich/firemcp/issues",
+    "documentation": "https://github.com/ollrich/firemcp",
     "license": "MIT",
     "keywords": [
         "browser",
-        "firefox"
+        "firefox",
+        "tabs",
+        "read-only"
     ],
     "server": {
         "type": "node",

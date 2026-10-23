@@ -1,10 +1,11 @@
 {
-  "name": "browser-control-mcp",
-  "version": "1.6.1",
+  "name": "firemcp",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "postinstall": "npm install --prefix mcp-server && npm install --prefix firefox-extension",
     "build": "npm run build --prefix mcp-server && npm run build --prefix firefox-extension",
-    "test": "npm test --prefix mcp-server && npm test --prefix firefox-extension"
+    "test": "npm test --prefix mcp-server && npm test --prefix firefox-extension",
+    "bump": "node scripts/bump-version.mjs"
   }
 }

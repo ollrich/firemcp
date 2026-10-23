@@ -355,7 +355,7 @@ export class MessageHandler {
       return message;
     }
 
-    const marker = `\n\n[Browser Control MCP: truncated response; original serialized length was ${serializedLength} characters]`;
+    const marker = `\n\n[FireMCP: truncated response; original serialized length was ${serializedLength} characters]`;
     const truncateFullText = (
       candidate: TabContentExtensionMessage
     ): TabContentExtensionMessage => {
@@ -551,7 +551,7 @@ export class MessageHandler {
         `The user has not authorized screenshots of tab ${tabId} ("${
           tab.title ?? tab.url
         }"). The extension's toolbar button is now marked with a "!" badge on that tab. ` +
-          `Ask the user to click the Browser Control MCP button in the Firefox toolbar while that tab is open, then try again. ` +
+          `Ask the user to click the FireMCP button in the Firefox toolbar while that tab is open, then try again. ` +
           `The authorization covers only that tab, and ends when the tab navigates or closes.`
       );
     }

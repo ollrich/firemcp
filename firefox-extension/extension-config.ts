@@ -1,5 +1,5 @@
 /**
- * Configuration management for Browser Control MCP extension
+ * Configuration management for the FireMCP extension
  */
 
 import { ServerMessageRequest } from "@browser-control-mcp/common/server-messages";

@@ -16,7 +16,7 @@ const serverDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..
 const repoDir = path.resolve(serverDir, "..");
 const pkg = JSON.parse(fs.readFileSync(path.join(serverDir, "package.json"), "utf8"));
 const manifest = JSON.parse(fs.readFileSync(path.join(serverDir, "manifest.json"), "utf8"));
-const output = path.resolve(process.argv[2] ?? path.join(serverDir, `firefox-control-${pkg.version}.dxt`));
+const output = path.resolve(process.argv[2] ?? path.join(serverDir, `firemcp-${pkg.version}.dxt`));
 const mcpb = path.join(serverDir, "node_modules", ".bin", "mcpb");
 
 if (manifest.version !== pkg.version) {

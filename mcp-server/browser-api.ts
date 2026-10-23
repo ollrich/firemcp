@@ -59,7 +59,7 @@ export function getWebSocketHosts(): string[] {
 
 export function buildPortInUseMessage(port: number): string {
   return (
-    `browser-control: port ${port} is already in use, likely by another MCP client session. ` +
+    `firemcp: port ${port} is already in use, likely by another MCP client session. ` +
     "No live broker responded for this EXTENSION_PORT and EXTENSION_SECRET, so forwarding could not start. " +
     "If this is a different browser, configure it with a different EXTENSION_PORT and EXTENSION_SECRET."
   );
@@ -131,7 +131,7 @@ export class BrowserAPI {
         return;
       }
       socket.once("close", () => resolve());
-      socket.close(1001, "browser-control broker shutting down");
+      socket.close(1001, "firemcp broker shutting down");
     })));
     this.extensionSockets.clear();
     this.ws = null;
@@ -139,7 +139,7 @@ export class BrowserAPI {
     try {
       await this.brokerServer?.close();
     } catch (error) {
-      console.error("Failed to close browser-control broker", error);
+      console.error("Failed to close the firemcp broker", error);
     }
     this.brokerServer = null;
 
@@ -428,7 +428,7 @@ export class BrowserAPI {
         this.brokerInfo = brokerInfo;
         this.unavailableReason = null;
         console.error(
-          `browser-control: forwarding browser tools for ${identity.id} to broker process ${brokerInfo.pid}`
+          `firemcp: forwarding browser tools for ${identity.id} to broker process ${brokerInfo.pid}`
         );
         return;
       }
@@ -552,7 +552,7 @@ export class BrowserAPI {
       // The extension connection works without the broker; only other sessions
       // lose the ability to forward to this one.
       console.error(
-        `browser-control: could not start the session broker at ${socketPath}; ` +
+        `firemcp: could not start the session broker at ${socketPath}; ` +
           "other MCP sessions cannot share this browser connection.",
         error
       );

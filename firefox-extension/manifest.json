@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "Browser Control MCP",
-    "version": "1.6.1",
-    "description": "An extension that allows a local MCP server to perform actions on the browser.",
+    "name": "FireMCP",
+    "version": "2.0.0",
+    "description": "Lets a local MCP server read your Firefox tabs, pages and history for AI assistants, with consent per domain. Read only.",
     "icons": {
         "16": "icons/icon-16.png",
         "32": "icons/icon-32.png",
@@ -23,18 +23,21 @@
         "bookmarks"
     ],
     "background": {
-      "scripts": ["dist/background.js"]
+        "scripts": [
+            "dist/background.js"
+        ]
     },
     "browser_action": {
-      "default_icon": "assets/screenshot.svg",
-      "default_title": "Browser Control MCP: allow a screenshot of this tab"
+        "default_icon": "assets/screenshot.svg",
+        "default_title": "FireMCP: allow a screenshot of this tab"
     },
     "options_ui": {
-      "page": "options.html"
+        "page": "options.html"
     },
     "browser_specific_settings": {
-      "gecko": {
-        "id": "@browser-control-mcp"
-      }
+        "gecko": {
+            "id": "firemcp@ollrich",
+            "strict_min_version": "126.0"
+        }
     }
-  }
+}

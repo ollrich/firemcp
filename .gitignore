@@ -52,8 +52,9 @@ dist
 # DXT
 *.dxt
 
-# Web extension dist
+# Web extension dist and staging
 web-ext-artifacts/
+firefox-extension/build/
 
 .DS_Store
 

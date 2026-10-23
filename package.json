@@ -6,6 +6,7 @@
     "postinstall": "npm install --prefix mcp-server && npm install --prefix firefox-extension",
     "build": "npm run build --prefix mcp-server && npm run build --prefix firefox-extension",
     "test": "npm test --prefix mcp-server && npm test --prefix firefox-extension",
-    "bump": "node scripts/bump-version.mjs"
+    "bump": "node scripts/bump-version.mjs",
+    "release:updates": "node scripts/update-manifest.mjs"
   }
 }

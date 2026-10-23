@@ -5,19 +5,23 @@
   "scripts": {
     "build": "npm run build:js && npm run package:xpi",
     "build:js": "esbuild background.ts --bundle --outfile=dist/background.js && esbuild options.ts --bundle --outfile=dist/options.js",
-    "package:xpi": "mkdir -p web-ext-artifacts && rm -f web-ext-artifacts/firemcp-$npm_package_version.xpi && zip -r web-ext-artifacts/firemcp-$npm_package_version.xpi manifest.json options.html assets icons dist/background.js dist/options.js",
-    "test": "jest"
+    "package:xpi": "npm run stage && mkdir -p web-ext-artifacts && rm -f web-ext-artifacts/firemcp-$npm_package_version.xpi && cd build && zip -qr ../web-ext-artifacts/firemcp-$npm_package_version.xpi .",
+    "test": "jest",
+    "stage": "node scripts/stage.mjs",
+    "lint:amo": "npm run build:js && npm run stage && web-ext lint --self-hosted --source-dir build",
+    "sign": "npm run build:js && npm run stage && node scripts/sign.mjs"
   },
   "license": "MIT",
   "description": "FireMCP Firefox add-on",
   "devDependencies": {
+    "@browser-control-mcp/common": "../common",
+    "@types/firefox-webext-browser": "^120.0.4",
     "@types/jest": "^29.5.14",
     "esbuild": "0.25.1",
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.2",
-    "@types/firefox-webext-browser": "^120.0.4",
-    "@browser-control-mcp/common": "../common"
+    "web-ext": "10.8.0"
   }
 }

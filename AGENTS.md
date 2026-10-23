@@ -26,6 +26,15 @@ Per project: `cd mcp-server && npm test` (builds first) or `cd firefox-extension
 
 `cd mcp-server && npm run pack-dxt` builds the Claude Desktop extension: it stages a runtime only copy, starts it once to check version and tool list against `manifest.json`, then validates and packs `firemcp-<version>.dxt`. List every tool in `manifest.json`. One version for everything: `npm run bump -- 2.0.1` in the root updates all package files, manifests and lockfiles (plain numbers only, AMO rejects suffixes).
 
+## Releasing the add-on
+
+Self distributed (unlisted) on addons.mozilla.org, updates through `updates.json` in this repo (`gecko.update_url`).
+
+1. `npm run bump -- X.Y.Z`, commit.
+2. `cd firefox-extension && npm run lint:amo` (must be clean), then `npm run sign` with `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET` set; it uploads the source archive of HEAD.
+3. `npm run release:updates -- <signed .xpi>` in the root: adds the version to `updates.json` and stages `firemcp-X.Y.Z.xpi`.
+4. GitHub release `vX.Y.Z` with that XPI (the workflow adds the DXT), then commit and push `updates.json`.
+
 ## Rules
 
 - **Read only.** No tools that click, type, submit forms or run arbitrary scripts in pages.

@@ -22,6 +22,7 @@ import {
   normalizeOpenUrl,
   pickActiveTab,
   redactPersonalData,
+  shortenUrl,
   slimContent,
   tabFlags,
 } from "./content-utils";
@@ -211,7 +212,8 @@ registerTool(
   "get-recent-browser-history",
   `Get recently visited pages from the browser history, newest first, one line per page
    (to get all, don't use searchQuery). The browser returns at most 200 pages per query.
-   The FireMCP add-on asks the user for the history permission on first use.`,
+   URLs over 300 characters come shortened. The FireMCP add-on asks the user for the
+   history permission on first use.`,
   {
     searchQuery: z.string().optional().describe("Words that must appear in the URL or title"),
     sinceHours: z.number().min(0).optional().describe("Only pages visited within this many hours"),
@@ -237,7 +239,7 @@ registerTool(
     const lines = shown.map((item) => {
       const lastVisited = item.lastVisitTime ? dayjs(item.lastVisitTime).fromNow() : "unknown";
       const title = item.title && item.title !== "null" ? `, title="${item.title}"` : "";
-      return `url=${item.url}${title}, last visited=${lastVisited}`;
+      return `url=${shortenUrl(item.url ?? "")}${title}, last visited=${lastVisited}`;
     });
     const summary = `${shown.length} of ${items.length} pages${items.length > shown.length ? ` (raise limit to see more)` : ""}`;
     return { content: [{ type: "text", text: [summary, ...lines].join("\n") }] };
@@ -1230,7 +1232,7 @@ registerTool(
     }
     const lines = items.map((item) => {
       const added = item.dateAdded ? `, added ${dayjs(item.dateAdded).format("YYYY-MM-DD")}` : "";
-      return `title="${item.title}", url=${item.url}, folder=${item.folder || "-"}${added}`;
+      return `title="${item.title}", url=${shortenUrl(item.url)}, folder=${item.folder || "-"}${added}`;
     });
     return { content: [{ type: "text", text: [`${items.length} bookmarks`, ...lines].join("\n") }] };
   }

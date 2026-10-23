@@ -17,6 +17,7 @@ const {
   filterTabs,
   tabFlags,
   compactMarkdown,
+  shortenUrl,
 } = utils;
 
 test("compactMarkdown keeps indentation but drops trailing spaces and blank runs", () => {
@@ -25,6 +26,14 @@ test("compactMarkdown keeps indentation but drops trailing spaces and blank runs
   const res = slimContent(markdown, [], { includeLinks: false, maxLinks: 0, maxChars: 8, compact: compactMarkdown });
   assert.equal(res.text, "# T\n\n- a");
   assert.equal(compactMarkdown(markdown.slice(0, res.rawConsumed)), "# T\n\n- a");
+});
+
+test("shortenUrl drops the query of long URLs first, then cuts", () => {
+  assert.equal(shortenUrl("https://a.example/page?x=1"), "https://a.example/page?x=1");
+  const signed = `https://assets.example/release/firemcp.dxt?sig=${"x".repeat(1200)}`;
+  assert.equal(shortenUrl(signed), `https://assets.example/release/firemcp.dxt?… (shortened from ${signed.length} characters)`);
+  const longPath = `https://a.example/${"p".repeat(400)}`;
+  assert.equal(shortenUrl(longPath, 50), `${longPath.slice(0, 50)}… (shortened from ${longPath.length} characters)`);
 });
 
 test("findSnippets marks hits, merges close ones and keeps raw offsets", () => {

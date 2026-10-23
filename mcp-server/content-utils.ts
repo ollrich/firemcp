@@ -321,6 +321,19 @@ export function findSnippets(
 }
 
 /**
+ * History and bookmark URLs can run past a thousand characters (signed download
+ * links, tracking parameters). Long ones lose their query, then their tail; the
+ * title next to them still says what the page is.
+ */
+export function shortenUrl(url: string, maxLength = 300): string {
+  if (url.length <= maxLength) return url;
+  const query = url.search(/[?#]/);
+  const base = query === -1 ? url : url.slice(0, query);
+  const short = base.length + 2 <= maxLength ? `${base}?…` : `${url.slice(0, maxLength)}…`;
+  return `${short} (shortened from ${url.length} characters)`;
+}
+
+/**
  * Accept what people type: bare domains get https://, http:// is upgraded
  * because the extension only opens https URLs.
  */

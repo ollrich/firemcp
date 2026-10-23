@@ -1,7 +1,13 @@
 {
   "addons": {
     "firemcp@ollrich": {
-      "updates": []
+      "updates": [
+        {
+          "version": "2.0.0",
+          "update_link": "https://github.com/ollrich/firemcp/releases/download/v2.0.0/firemcp-2.0.0.xpi",
+          "update_hash": "sha256:07008ab65b65952e739e4b4c7fbe9e78797980e4931f7cd12f53fe3cbcd618ab"
+        }
+      ]
     }
   }
 }

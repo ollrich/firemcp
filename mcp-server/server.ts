@@ -16,6 +16,7 @@ import {
   findSnippets,
   formatTabLine,
   isConsentTabFor,
+  isFeatureConsentTabFor,
   markPhrases,
   matchTabs,
   normalizeOpenUrl,
@@ -47,6 +48,17 @@ const READS_BROWSER = { readOnlyHint: true, openWorldHint: false };
 const READS_WEB = { readOnlyHint: true, openWorldHint: true };
 const OPENS_PAGES = { readOnlyHint: false, destructiveHint: false, openWorldHint: true };
 const CHANGES_TABS = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
+
+// How long a tool waits for the user to answer the add-on's consent dialog.
+const DEFAULT_CONSENT_WAIT_MS = 30_000;
+const consentWaitParam = (firstUse: string) =>
+  z
+    .number()
+    .int()
+    .min(0)
+    .max(120_000)
+    .default(DEFAULT_CONSENT_WAIT_MS)
+    .describe(`How long to wait for the user to grant access when ${firstUse} for the first time (0 = fail right away)`);
 
 // BROWSER_MCP_TOOLS picks the offered tools: "all" (default), "read" (tools that
 // only read, plus opening pages) or a comma separated list of tool names.
@@ -198,15 +210,17 @@ registerTool(
 registerTool(
   "get-recent-browser-history",
   `Get recently visited pages from the browser history, newest first, one line per page
-   (to get all, don't use searchQuery). The browser returns at most 200 pages per query.`,
+   (to get all, don't use searchQuery). The browser returns at most 200 pages per query.
+   The FireMCP add-on asks the user for the history permission on first use.`,
   {
     searchQuery: z.string().optional().describe("Words that must appear in the URL or title"),
     sinceHours: z.number().min(0).optional().describe("Only pages visited within this many hours"),
     limit: z.number().int().min(1).max(200).default(50),
+    consentWaitMs: consentWaitParam("the history is read"),
   },
   READS_BROWSER,
-  async ({ searchQuery, sinceHours, limit }) => {
-    let items = await browserApi.getBrowserRecentHistory(searchQuery);
+  async ({ searchQuery, sinceHours, limit, consentWaitMs }) => {
+    let items = await withFeatureConsent("history", consentWaitMs, () => browserApi.getBrowserRecentHistory(searchQuery));
     if (sinceHours !== undefined) {
       const since = Date.now() - sinceHours * 3_600_000;
       items = items.filter((item) => (item.lastVisitTime ?? 0) >= since);
@@ -297,11 +311,12 @@ registerTool(
 
 registerTool(
   "find-highlight-in-browser-tab",
-  "Find and highlight text in a browser tab (use a query phrase that exists in the web content)",
-  { tabId: z.number(), queryPhrase: z.string() },
+  `Find and highlight text in a browser tab (use a query phrase that exists in the web content).
+   The first use asks the user for the find permission.`,
+  { tabId: z.number(), queryPhrase: z.string(), consentWaitMs: consentWaitParam("text is highlighted") },
   CHANGES_TABS,
-  async ({ tabId, queryPhrase }) => {
-    const noOfResults = await browserApi.findHighlight(tabId, queryPhrase);
+  async ({ tabId, queryPhrase, consentWaitMs }) => {
+    const noOfResults = await withFeatureConsent("find", consentWaitMs, () => browserApi.findHighlight(tabId, queryPhrase));
     return {
       content: [
         {
@@ -413,13 +428,13 @@ type TextContent = { type: "text"; text: string };
 const DEFAULT_SETTLE_MS = 1000;
 const DEFAULT_MAX_SETTLE_MS = 8000;
 const DEFAULT_LOAD_TIMEOUT_MS = 20_000;
-const DEFAULT_CONSENT_WAIT_MS = 30_000;
 // Below this many characters a page probably is an unrendered script shell.
 const MIN_RENDERED_CHARS = 300;
 const CONSENT_POLL_MS = 1500;
 // Never seeing the consent tab means the extension works differently; stop waiting.
 const CONSENT_TAB_GRACE_MS = 4000;
 const CONSENT_ERROR = /not yet granted permission to access the domain/i;
+const FEATURE_CONSENT_ERROR = /not yet granted permission for the following operations/i;
 // The extension returns one chunk of about 50k raw characters per call; with a
 // larger maxChars further chunks are fetched, up to this many.
 const MAX_CHUNKS_PER_READ = 10;
@@ -442,13 +457,7 @@ const slimParams = {
     .describe(
       `Cap on returned characters (default ${DEFAULT_MAX_CHARS}; MCP clients offload or cut much larger replies). The reply names the offset to continue from. Values above one extension chunk (about 50k raw characters) fetch the following chunks.`
     ),
-  consentWaitMs: z
-    .number()
-    .int()
-    .min(0)
-    .max(120_000)
-    .default(DEFAULT_CONSENT_WAIT_MS)
-    .describe("How long to wait for the user to grant access when a domain is read for the first time (0 = fail right away)"),
+  consentWaitMs: consentWaitParam("a domain is read"),
   format: z
     .enum(["text", "markdown"])
     .default("text")
@@ -539,15 +548,16 @@ async function waitForTabComplete(
   }
 }
 
-// The extension answers the first read of a domain with an error and opens its
-// consent page in a new tab, which closes itself once the user grants access.
-async function waitForConsent(pageUrl: string | undefined, timeoutMs: number): Promise<boolean> {
+// The extension answers the first read of a domain, or the first use of an
+// optional permission, with an error and opens its consent page in a new tab,
+// which closes itself once the user grants access.
+async function waitForConsent(isConsentTab: (tab: BrowserTab) => boolean, timeoutMs: number): Promise<boolean> {
   const start = Date.now();
   let seenConsentTab = false;
   // Look right away: the consent tab exists before the error arrives, and a quick
   // click could close it before a delayed first look.
   for (;;) {
-    const pending = (await browserApi.getTabList()).some((t) => isConsentTabFor(t, pageUrl));
+    const pending = (await browserApi.getTabList()).some(isConsentTab);
     const elapsed = Date.now() - start;
     if (pending) {
       seenConsentTab = true;
@@ -574,36 +584,57 @@ async function fetchTabContent(
   );
 }
 
-// Run a page read; when the extension asks the user for consent to the domain,
-// wait for it (see waitForConsent) and run the read once more.
+// Run a call; when the extension answers with consentError and asks the user,
+// wait for the consent tab (see waitForConsent) and run the call once more.
+async function withConsent<T>(
+  consentError: RegExp,
+  isConsentTab: (tab: BrowserTab) => boolean,
+  consentWaitMs: number,
+  pendingConsent: (error: unknown) => unknown,
+  call: () => Promise<T>
+): Promise<T> {
+  try {
+    return await call();
+  } catch (error) {
+    if (!consentError.test(errorText(error))) {
+      throw error;
+    }
+    // Every failed call opens another consent tab, so only retry after the
+    // consent tab has closed.
+    if (consentWaitMs <= 0 || !(await waitForConsent(isConsentTab, consentWaitMs))) {
+      throw pendingConsent(error);
+    }
+    try {
+      return await call();
+    } catch (retryError) {
+      throw consentError.test(errorText(retryError)) ? pendingConsent(retryError) : retryError;
+    }
+  }
+}
+
+// A page read that may need the user's consent to the tab's domain.
 async function withDomainConsent<T>(
   tab: BrowserTab,
   consentWaitMs: number,
   read: () => Promise<T>
 ): Promise<T> {
   const tabId = tab.id as number;
-  const pendingConsent = (error: unknown) =>
-    new ConsentPendingError(
-      `${errorText(error)} Once the user has granted access, call read-tab with tabId=${tabId}.`
-    );
+  return withConsent(
+    CONSENT_ERROR,
+    (t) => isConsentTabFor(t, tab.url),
+    consentWaitMs,
+    (error) =>
+      new ConsentPendingError(
+        `${errorText(error)} Once the user has granted access, call read-tab with tabId=${tabId}.`
+      ),
+    read
+  );
+}
 
-  try {
-    return await read();
-  } catch (error) {
-    if (!CONSENT_ERROR.test(errorText(error))) {
-      throw error;
-    }
-    // Every failed read opens another consent tab, so only retry after the
-    // consent tab has closed.
-    if (consentWaitMs <= 0 || !(await waitForConsent(tab.url, consentWaitMs))) {
-      throw pendingConsent(error);
-    }
-    try {
-      return await read();
-    } catch (retryError) {
-      throw CONSENT_ERROR.test(errorText(retryError)) ? pendingConsent(retryError) : retryError;
-    }
-  }
+// A call that may need an optional permission of the FireMCP add-on (history,
+// bookmarks, find). The extension's error already says to try again.
+async function withFeatureConsent<T>(permission: string, consentWaitMs: number, call: () => Promise<T>): Promise<T> {
+  return withConsent(FEATURE_CONSENT_ERROR, (t) => isFeatureConsentTabFor(t, permission), consentWaitMs, (error) => error, call);
 }
 
 function lengthsSettled(previous: number, current: number): boolean {
@@ -1187,11 +1218,12 @@ registerTool(
   {
     query: z.string().min(1),
     limit: z.number().int().min(1).max(200).default(50),
+    consentWaitMs: consentWaitParam("bookmarks are searched"),
   },
   READS_BROWSER,
-  async ({ query, limit }) => {
+  async ({ query, limit, consentWaitMs }) => {
     await requireExtensionCommand("search-bookmarks", "Searching bookmarks");
-    const items = await browserApi.searchBookmarks(query, limit);
+    const items = await withFeatureConsent("bookmarks", consentWaitMs, () => browserApi.searchBookmarks(query, limit));
     if (items.length === 0) {
       return { content: [{ type: "text", text: `No bookmarks match "${query}".` }] };
     }

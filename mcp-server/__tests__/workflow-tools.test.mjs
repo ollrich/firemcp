@@ -36,6 +36,10 @@ const consentMessage = (origin) =>
   `The user has not yet granted permission to access the domain "${origin}". ` +
   "A dialog is now being opened to request permission. If the user grants permission, you can try the request again.";
 
+const permissionMessage = (permission) =>
+  `The user has not yet granted permission for the following operations: ${permission}. ` +
+  "A dialog is now being opened to request permission. If the user grants permission, you can try the request again.";
+
 // Fields the fake keeps for itself; everything else is sent like a tabs.Tab.
 const publicTab = ({ text, reads, pendingUrl, blankPolls, loadingPolls, links, ...tab }) => tab;
 
@@ -60,6 +64,18 @@ function startFakeExtension(port, state) {
     };
     // The add-on reports failures as unsigned error messages.
     const fail = (errorMessage) => ws.send(JSON.stringify({ correlationId: payload.correlationId, errorMessage }));
+    // Optional permissions of the FireMCP add-on (history, bookmarks) are asked for on first use.
+    const askPermission = (permission) => {
+      state.tabs.push({
+        id: state.nextId++,
+        url: `moz-extension://fake-uuid/options.html?requestPermissions=${encodeURIComponent(JSON.stringify([permission]))}`,
+        title: "FireMCP",
+        status: "complete",
+        lastAccessed: Date.now(),
+      });
+      state.onPermissionRequested?.(permission);
+      fail(permissionMessage(permission));
+    };
 
     switch (payload.cmd) {
       case "get-tab-list":
@@ -78,6 +94,7 @@ function startFakeExtension(port, state) {
         reply({ resource: "tabs-closed" });
         break;
       case "get-browser-recent-history": {
+        if (state.missingPermissions.has("history")) return askPermission("history");
         const query = (payload.searchQuery ?? "").toLowerCase();
         reply({
           resource: "history",
@@ -136,6 +153,7 @@ function startFakeExtension(port, state) {
         if (payload.cmd === "get-page-meta") reply({ resource: "page-meta", tabId: tab.id, meta: tab.meta });
         if (payload.cmd === "get-selection") reply({ resource: "selection", tabId: tab.id, text: tab.selection ?? "" });
         if (payload.cmd === "search-bookmarks") {
+          if (state.missingPermissions.has("bookmarks")) return askPermission("bookmarks");
           reply({ resource: "bookmarks", items: state.bookmarks.filter((b) => b.title.toLowerCase().includes(payload.query)) });
         }
         break;
@@ -167,6 +185,10 @@ const grantConsent = (origin) => {
   // The consent page closes itself after the user grants access.
   state.tabs = state.tabs.filter((t) => !t.url.startsWith("moz-extension://"));
 };
+const grantPermission = (permission) => {
+  state.missingPermissions.delete(permission);
+  state.tabs = state.tabs.filter((t) => !t.url.startsWith("moz-extension://"));
+};
 
 const longText = "Rohan Nayak post\n\n\n\n\n" + "Pocket FM grew a lot.   ".repeat(30);
 const state = {
@@ -177,6 +199,7 @@ const state = {
   nextId: 100,
   pageCap: 50_000,
   deniedOrigins: new Set(),
+  missingPermissions: new Set(),
   pages: {},
   tabs: [],
   history: [
@@ -580,6 +603,39 @@ test("extension 2.0 tools work against an own build", async () => {
     res = await leader.callTool({ name: "search-bookmarks", arguments: { query: "paper" } });
     assert.match(textOf(res), /title="Paper on tabs", url=https:\/\/papers\.example\/1, folder=Bookmarks Menu \/ Research, added 2026-10-01/);
   } finally {
+    state.ownBuild = false;
+    ext.close();
+    ext = await startFakeExtension(port, state);
+  }
+});
+
+test("history and bookmarks wait for the optional permission, then answer", async () => {
+  state.ownBuild = ["get-extension-info", "search-bookmarks"];
+  ext.close();
+  ext = await startFakeExtension(port, state);
+  state.bookmarks = [{ title: "Paper on tabs", url: "https://papers.example/1", folder: "Research" }];
+  try {
+    // The user allows right after the dialog shows up.
+    state.onPermissionRequested = (permission) => setTimeout(() => grantPermission(permission), 800);
+    for (const [name, args, expected] of [
+      ["get-recent-browser-history", { searchQuery: "guide", consentWaitMs: 15_000 }, /url=https:\/\/docs\.example\/guide/],
+      ["search-bookmarks", { query: "paper", consentWaitMs: 15_000 }, /title="Paper on tabs"/],
+    ]) {
+      state.missingPermissions.add(name === "search-bookmarks" ? "bookmarks" : "history");
+      const res = await leader.callTool({ name, arguments: args });
+      assert.equal(res.isError, undefined, textOf(res));
+      assert.match(textOf(res), expected);
+    }
+
+    // Without waiting the extension's message comes through.
+    delete state.onPermissionRequested;
+    state.missingPermissions.add("history");
+    const res = await leader.callTool({ name: "get-recent-browser-history", arguments: { consentWaitMs: 0 } });
+    assert.equal(res.isError, true);
+    assert.match(textOf(res), /following operations: history.*try the request again/s);
+  } finally {
+    delete state.onPermissionRequested;
+    grantPermission("history");
     state.ownBuild = false;
     ext.close();
     ext = await startFakeExtension(port, state);

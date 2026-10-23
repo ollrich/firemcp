@@ -357,6 +357,23 @@ export function isConsentTabFor(tab: BrowserTab, pageUrl: string | undefined): b
   }
 }
 
+/**
+ * The extension's consent page for an optional permission such as history or
+ * bookmarks: options.html?requestPermissions=["history"]. It closes itself once
+ * the user grants it.
+ */
+export function isFeatureConsentTabFor(tab: BrowserTab, permission: string): boolean {
+  if (!tab.url?.startsWith("moz-extension://")) {
+    return false;
+  }
+  try {
+    const requested: unknown = JSON.parse(new URL(tab.url).searchParams.get("requestPermissions") ?? "[]");
+    return Array.isArray(requested) && requested.includes(permission);
+  } catch {
+    return false;
+  }
+}
+
 function passesLuhn(digits: string): boolean {
   let sum = 0;
   for (let i = 0; i < digits.length; i++) {

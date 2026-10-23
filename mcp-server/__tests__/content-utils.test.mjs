@@ -12,6 +12,7 @@ const {
   pickActiveTab,
   normalizeOpenUrl,
   isConsentTabFor,
+  isFeatureConsentTabFor,
   findSnippets,
   filterTabs,
   tabFlags,
@@ -168,6 +169,17 @@ test("isConsentTabFor recognizes the extension's consent page by origin", () => 
   assert.equal(isConsentTabFor(consent, "https://b.example/page"), false);
   assert.equal(isConsentTabFor({ id: 1, url: "https://a.example" }, "https://a.example"), false);
   assert.equal(isConsentTabFor(consent, undefined), false);
+});
+
+test("isFeatureConsentTabFor recognizes the consent page for an optional permission", () => {
+  const consent = {
+    id: 9,
+    url: `moz-extension://uuid/options.html?requestPermissions=${encodeURIComponent(JSON.stringify(["bookmarks"]))}`,
+  };
+  assert.equal(isFeatureConsentTabFor(consent, "bookmarks"), true);
+  assert.equal(isFeatureConsentTabFor(consent, "history"), false);
+  assert.equal(isFeatureConsentTabFor({ id: 1, url: "moz-extension://uuid/options.html?requestPermissions=%5Bbroken" }, "history"), false);
+  assert.equal(isFeatureConsentTabFor({ id: 1, url: "https://a.example/?requestPermissions=%5B%22history%22%5D" }, "history"), false);
 });
 
 test("redactPersonalData masks contact and payment data but keeps ordinary numbers", () => {

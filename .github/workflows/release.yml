@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+# Uploading release assets needs write access; new repositories default to read only.
+permissions:
+  contents: write
+
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest

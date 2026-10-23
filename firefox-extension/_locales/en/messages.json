@@ -47,6 +47,10 @@
   "setupOtherButton": {
     "message": "Installation guide"
   },
+  "setupGuideUrl": {
+    "message": "https://github.com/ollrich/firemcp#installation",
+    "description": "Link to the installation guide in this language"
+  },
   "secretTitle": {
     "message": "Secret key"
   },

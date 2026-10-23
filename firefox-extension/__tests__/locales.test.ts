@@ -24,7 +24,7 @@ describe("locales", () => {
     const options = fs.readFileSync(path.join(root, "options.ts"), "utf8");
     const used = [
       ...[...manifest.matchAll(/__MSG_(\w+)__/g)].map((m) => m[1]),
-      ...[...html.matchAll(/data-i18n="(\w+)"/g)].map((m) => m[1]),
+      ...[...html.matchAll(/data-i18n(?:-href)?="(\w+)"/g)].map((m) => m[1]),
       ...[...options.matchAll(/\bt\("(\w+)"/g)].map((m) => m[1]),
       ...AVAILABLE_TOOLS.flatMap((tool) => {
         const key = `tool_${tool.id.replace(/-/g, "_")}`;

@@ -47,6 +47,10 @@
   "setupOtherButton": {
     "message": "Installationsanleitung"
   },
+  "setupGuideUrl": {
+    "message": "https://github.com/ollrich/firemcp/blob/main/README.de.md#installation",
+    "description": "Link to the installation guide in this language"
+  },
   "secretTitle": {
     "message": "Geheimer Schlüssel"
   },

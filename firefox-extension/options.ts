@@ -29,6 +29,10 @@ function translatePage() {
   document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((element) => {
     element.textContent = t(element.dataset.i18n as string);
   });
+  // Links to the README in the browser's language.
+  document.querySelectorAll<HTMLAnchorElement>("a[data-i18n-href]").forEach((link) => {
+    link.href = t(link.dataset.i18nHref as string);
+  });
 }
 
 const secretDisplay = document.getElementById(

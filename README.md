@@ -1,122 +1,145 @@
-# Browser Control MCP
+# FireMCP
 
-[![Firefox Add-on](./.github/addon_badge.svg)](https://addons.mozilla.org/en-US/firefox/addon/browser-control-mcp/)
+[![Release](https://img.shields.io/github/v/release/ollrich/firemcp)](https://github.com/ollrich/firemcp/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/ollrich/firemcp)](LICENSE)
 
-An MCP server paired with a Firefox browser extension that provides AI assistants with access to tab management, browsing history, and webpage text content.
+English | [Deutsch](README.de.md)
 
-## Features
+FireMCP lets your AI assistant read your real Firefox: open tabs, live rendered pages, search within pages, history, bookmarks and screenshots. It consists of a Firefox add-on and a local MCP server, so it works with Claude Desktop, Claude Code and other MCP clients.
 
-The MCP server supports the following tools:
-- Open or close tabs
-- Get the list of opened tabs
-- Create tab groups with name and color
-- Reorder opened tabs
-- Read and search the browser's history
-- Read a webpage's text content and links (requires user consent)
-- Find and highlight text in a browser tab (requires user consent)
+It reads what you already see in your browser, including pages behind a login and pages that only render with JavaScript, where a plain web fetch returns stale or empty content. It can open, close and arrange tabs, but it never clicks, types, submits forms or runs scripts of its own on pages.
 
-## Fork additions (ollie)
+## Tools
 
-Two one step tools on top of the singleton broker fork, built for research workflows where a plain web fetch returns stale or empty pages:
+**Reading pages**
 
-- `read-tab` reads an open tab by URL or title fragment (`"x.com/rohan"`), by `tabId`, or the most recently used tab when called without arguments.
-- `open-and-read-tab` opens a URL, waits until it has loaded and rendered, and returns the text. Script heavy pages get one automatic retry.
+| Tool | What it does |
+|------|--------------|
+| `read-tab` | Read an open tab, found by URL or title fragment, by tab ID, or the active tab |
+| `read-tabs` | Read several open tabs in one call |
+| `open-and-read-tab` | Open a URL, wait until it has rendered and return its text |
+| `open-and-read-tabs` | Open several URLs in background tabs, read them and close them again |
+| `search-tab` | Find text in a tab and return snippets with offsets |
+| `read-page-meta` | Meta tags, Open Graph, JSON-LD and headings of a page |
+| `read-selection` | The text you have selected in a tab |
+| `get-tab-web-content` | Full text and links of a tab (the original low level tool) |
+| `capture-tab-screenshot` | Screenshot of the visible part of a tab |
 
-Both return compacted text without links by default (`includeLinks: true` to get a deduplicated, capped link list). They only use commands the stock add-on already supports, so no extension update is needed.
+The reading tools return compact text, by default up to 40,000 characters per call with the offset to continue from. Options: `format: "markdown"` keeps headings, lists, links and tables, `mainContentOnly` leaves out navigation and sidebars, `selector` and `excludeSelector` pick parts of a page, and `redactPersonalData` masks e-mail addresses, phone numbers, IBANs and card numbers.
 
-## Example use-cases:
+**Browser data**
 
-### Tab management
-- *"Close all non-work-related tabs in my browser."*
-- *"Group all development related tabs in my browser into a new group called 'Development'."*
-- *"Rearrange tabs in my browser in an order that makes sense."*
-- *"Close all tabs in my browser that haven't been accessed within the past 24 hours"*
+| Tool | What it does |
+|------|--------------|
+| `get-list-of-open-tabs` | Open tabs with state (active, unloaded, loading), filter and sort |
+| `get-current-tab` | The tab you are looking at |
+| `get-tab-metadata` | Details of one tab |
+| `get-recent-browser-history` | Visited pages, newest first, filtered by words and age |
+| `search-bookmarks` | Bookmarks with folder path and date added |
 
-### Browser history search
-- *"Help me find an article in my browser history about the Milford track in NZ."*
-- *"Open all the articles about AI that I visited during the last week, up to 10 articles, avoid duplications."*
+**Tabs**
 
-### Browsing and research 
-- *"Open hackernews in my browser, then open the top story, read it, also read the comments. Do the comments agree with the story?"*
-- *"In my browser, use Google Scholar to search for papers about L-theanine in the last 3 years. Open the 3 most cited papers. Read them and summarize them for me."*
-- *"Use Google search in my browser to look for flower shops. Open the 10 most relevant results. Show me a table of each flower shop with location and opening hours."*
+| Tool | What it does |
+|------|--------------|
+| `open-browser-tab` | Open a page in a new tab |
+| `close-browser-tabs` | Close tabs |
+| `reorder-browser-tabs` | Change the order of tabs |
+| `group-browser-tabs` | Put tabs into a named, colored tab group |
+| `find-highlight-in-browser-tab` | Find and highlight text in a tab |
 
-## Comparison to web automation MCP servers
+## What stays under your control
 
-The MCP server and Firefox extension combo is designed to be more secure than web automation MCP servers, enabling safer use with the user's personal browser.
+- **Local only.** The add-on talks to the MCP server on your computer over `127.0.0.1` and `::1`, and only accepts commands signed with a secret key that only the two of them know. FireMCP has no server of its own and collects no telemetry.
+- **Consent per site.** The add-on reads a page only after you have allowed its site once. History, bookmarks and find on page are optional permissions, asked for on first use. A screenshot needs a click on the FireMCP toolbar button in that tab.
+- **Deny list.** Sites on the list are never read or opened and are left out of history and bookmark results.
+- **Switches and log.** Every tool can be switched off in the add-on's settings, and the last 100 actions are logged there.
 
-* It does not support web page modification, page interactions, or arbitrary scripting.
-* Reading webpage content requires the user's explicit consent in the browser for each domain. This is enforced at the extension's manifest level.
-* It uses a local-only connection with a shared secret between the MCP server and extension.
-* No remote data collection or tracking.
-* It provides an extension-side audit log for tool calls and tool enable/disable configuration.
-* The extension includes no runtime third-party dependencies.
-
-**Important note**: Browser Control MCP is still experimental. Use at your own risk. You should practice caution as with any other MCP server and authorize/monitor tool calls carefully.
+Your assistant sees whatever it reads. Pages can contain text written to mislead AI assistants, so keep an eye on what your assistant does with your browser, as with any MCP server.
 
 ## Installation
 
-### Option 1: Install the Firefox and Claude Desktop extensions
+You need Firefox 140 or later.
 
-The Firefox extension / add-on is [available on addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/browser-control-mcp/). You can also download and open the latest pre-built version from this GitHub repository: [browser-control-mcp-1.5.0.xpi](https://github.com/eyalzh/browser-control-mcp/releases/download/v1.5.0/browser-control-1.5.0.xpi). Complete the installation based on the instructions in the "Manage extension" page, which will open automatically after installation.
+### 1. Firefox add-on
 
-The add-on's "Manage extension" page will include a link to the Claude Desktop DXT file. You can also download it here: [mcp-server-v1.5.1.dxt](
-https://github.com/eyalzh/browser-control-mcp/releases/download/v1.5.1/mcp-server-v1.5.1.dxt). After downloading the file, open it or drag it into Claude Desktop's settings window. Make sure to enable the DXT extension after installing it. This will only work with the latest versions of Claude Desktop. If you wish to install the MCP server locally, see the MCP configuration below.
+Open the [latest release](https://github.com/ollrich/firemcp/releases/latest) in Firefox and click `firemcp-<version>.xpi`. The add-on is signed by Mozilla and updates itself. Its settings page opens after the installation and shows the secret key that the MCP server needs.
 
-### Option 2: Build from code
+### 2. MCP server
 
-To build from code, clone this repository, then run the following commands in the main repository directory to build both the MCP server and the browser extension.
-```
+**Claude Desktop:** Download `firemcp-<version>.dxt` from the same release and open it, or drag it into the extensions page of Claude Desktop's settings. Enter the secret key under "Configure" and switch the extension on.
+
+**Claude Code** (needs Node.js 22 or later):
+
+```bash
+git clone https://github.com/ollrich/firemcp.git
+cd firemcp
 npm install
 npm run build
+claude mcp add firemcp --scope user -e EXTENSION_SECRET=<secret> -- node "$PWD/mcp-server/dist/server.js"
 ```
 
-#### Installing a Firefox Temporary Add-on 
+**Other MCP clients:** Build as above, then add the server to the client's configuration:
 
-To install the extension on Firefox as a Temporary Add-on:
-
-1. Type `about:debugging` in the Firefox URL bar
-2. Click on "This Firefox"
-3. click on "Load Temporary Add-on..."
-4. Select the `manifest.json` file under the `firefox-extension` folder in this project
-5. The extension's preferences page will open. Copy the secret key to your clipboard. It will be used to configure the MCP server.
-
-Alternatively, to install a permanent add-on, you can install the [Browser Control MCP on addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/browser-control-mcp/) and then configure the MCP Server as detailed below.
-
-If you prefer not to run the extension on your personal Firefox browser, an alternative is to download a separate Firefox instance (such as Firefox Developer Edition, available at https://www.mozilla.org/en-US/firefox/developer/).
-
-#### Installing an unsigned XPI locally
-
-Download the `.xpi` from the GitHub Releases page. In Firefox Developer Edition, Nightly, ESR, or enterprise-managed Firefox, open `about:config`, set `xpinstall.signatures.required` to `false`, and if installation is still blocked set `xpinstall.whitelist.required` to `false`. Then open `about:addons` and choose "Install Add-on From File..." from the gear menu. Select the downloaded `.xpi`.
-
-
-#### MCP Server configuration
-
-After installing the browser extension, add the following configuration to your mcpServers configuration (e.g. `claude_desktop_config.json` for Claude Desktop):
 ```json
 {
-    "mcpServers": {
-        "browser-control": {
-            "command": "node",
-            "args": [
-                "/path/to/repo/mcp-server/dist/server.js"
-            ],
-            "env": {
-                "EXTENSION_SECRET": "<secret_on_firefox_extension_options_page>",
-                "EXTENSION_PORT": "8089" 
-            }
-        }
+  "mcpServers": {
+    "firemcp": {
+      "command": "node",
+      "args": ["/path/to/firemcp/mcp-server/dist/server.js"],
+      "env": { "EXTENSION_SECRET": "<secret>" }
     }
+  }
 }
 ```
-Replace `/path/to/repo` with the correct path.
 
-Set the EXTENSION_SECRET to the value shown on the extension's preferences page in Firefox (you can access it at `about:addons`). You can also set the EXTENSION_PORT environment variable to specify the port that the MCP server will use to communicate with the extension (default is 8089).
+The connection to the add-on is up a few seconds after the server starts.
 
-It might take a few seconds for the MCP server to connect to the extension.
+### Settings
 
-##### Multiple MCP clients and browsers
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `EXTENSION_SECRET` | (required) | Secret key from the add-on's settings page |
+| `EXTENSION_PORT` | `8089` | Port for the connection to the add-on; must match the add-on's settings |
+| `BROWSER_MCP_TOOLS` | `all` | `all`, `read` (only reading tools plus opening pages) or a comma separated list of tool names |
+| `BROWSER_MCP_DEBUG` | off | `1` writes a detailed log to stderr |
 
-Browser Control MCP supports a local singleton broker mode. The first MCP server process configured for a browser opens the WebSocket connection to the Firefox extension and becomes the local broker. Additional MCP server processes with the same `EXTENSION_PORT` and `EXTENSION_SECRET` automatically forward browser tool calls to that broker, so multiple AI clients can share the same browser session without port conflicts.
+### Several MCP clients
 
-To use a separate browser profile or a different Firefox installation, configure that browser extension with a different port and secret, then use those values in that MCP client's environment. Broker identity is based on `EXTENSION_PORT` plus a hash of `EXTENSION_SECRET`, so different browser port/key pairs stay isolated.
+Several clients can use the same Firefox at once, for example Claude Desktop and a few Claude Code sessions. The first server process for a port and secret owns the connection to the add-on; further processes with the same values pass their calls on to it. A second browser or Firefox profile gets its own port and secret.
+
+### The original add-on
+
+FireMCP grew out of [Browser Control MCP](https://github.com/eyalzh/browser-control-mcp). The server also works with that add-on from addons.mozilla.org, with fewer features: no markdown, no selectors, no page metadata, selected text or bookmarks. Tools that need the FireMCP add-on say so.
+
+## Examples
+
+- *"Read the open Jira tab and list the tickets assigned to me."*
+- *"Search my history for the article about night trains I read last week and summarize it."*
+- *"Open the three newest results on the conference page and compare their deadlines."*
+
+## Development
+
+```bash
+npm install
+npm run build   # MCP server and add-on, the XPI lands in firefox-extension/web-ext-artifacts
+npm test        # server tests (node:test) and add-on tests (Jest)
+```
+
+- `mcp-server`: the MCP server (TypeScript, Node.js)
+- `firefox-extension`: the Firefox add-on (Manifest V2), texts in `_locales/en` and `_locales/de`
+- `common`: message types shared by both
+
+For a test without signing, load `firefox-extension/manifest.json` as a temporary add-on in `about:debugging`. Architecture, project rules and the release steps are in [AGENTS.md](AGENTS.md).
+
+## Credits
+
+FireMCP builds on the work of others:
+
+- **[Eyal Zach (eyalzh)](https://github.com/eyalzh/browser-control-mcp)** wrote Browser Control MCP, the MCP server and Firefox add-on this project grew out of, including the tab screenshot tool ([eyalzh/browser-control-mcp#59](https://github.com/eyalzh/browser-control-mcp/pull/59)).
+- **[Kostiantyn Kugot (kkugot)](https://github.com/kkugot/browser-control-mcp)** added the singleton broker that lets several MCP clients share one browser, and the `get-current-tab` and `get-tab-metadata` tools, based on pull requests by [dsdshcym](https://github.com/eyalzh/browser-control-mcp/pull/44) and [Alex Kapranoff](https://github.com/eyalzh/browser-control-mcp/pull/41).
+
+Their full history is part of this repository. FireMCP itself is maintained by [Oliver Eichhof (ollrich)](https://github.com/ollrich).
+
+## License
+
+[MIT](LICENSE). Firefox is a trademark of the Mozilla Foundation; FireMCP is not affiliated with Mozilla.

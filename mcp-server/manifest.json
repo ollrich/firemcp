@@ -1,8 +1,9 @@
 {
     "dxt_version": "0.1",
     "name": "firemcp",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "display_name": "FireMCP",
+    "icon": "icon.png",
     "description": "Read your Firefox from Claude: tabs, live rendered pages, search in pages, history, bookmarks and screenshots. Page content only with your consent per site.",
     "long_description": "FireMCP gives AI assistants read access to your real Firefox through a local MCP connection: open tabs, live rendered pages (including script heavy sites), search within pages, browsing history, bookmarks and screenshots. It can also open, close and arrange tabs, but it never clicks, types or runs scripts on pages.\n\nPage content needs your consent per site in Firefox, screenshots your consent per tab, history and bookmarks your consent on first use. Several MCP clients can share one browser connection.\n\n**Note:** This extension needs the FireMCP Firefox add-on, see [github.com/ollrich/firemcp](https://github.com/ollrich/firemcp). It also works with the original \"Browser Control MCP\" add-on from addons.mozilla.org, with fewer features. Copy the secret key from the add-on's settings page into this extension's configuration.",
     "author": {

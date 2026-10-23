@@ -31,6 +31,8 @@ try {
   fs.copyFileSync(path.join(serverDir, "manifest.json"), path.join(stage, "manifest.json"));
   fs.cpSync(path.join(serverDir, "dist"), path.join(stage, "dist"), { recursive: true });
   fs.copyFileSync(path.join(repoDir, "LICENSE"), path.join(stage, "LICENSE"));
+  // One logo for both: the add-on icon is the DXT icon.
+  fs.copyFileSync(path.join(repoDir, "firefox-extension", "icons", "icon-512.png"), path.join(stage, "icon.png"));
 
   // common is only imported for types; the bundle must not depend on the local link.
   const { "@browser-control-mcp/common": _types, ...dependencies } = pkg.dependencies;

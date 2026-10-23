@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512">
+  <title>FireMCP</title>
+  <rect width="64" height="64" rx="14" fill="#1F2A44"/>
+  <g fill="none" stroke="#F1F3F5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="19,20 9,32 19,44"/>
+    <polyline points="45,20 55,32 45,44"/>
+  </g>
+  <g transform="translate(32 32) scale(0.6) translate(-32.5 -30.5)">
+    <path fill="#F76707" d="M32 6 C34 14 44 21 46 33 C48 45 41 55 32 55 C23 55 16 47 17.5 37 C18.5 30 23 26 25 20 C27 25 28.5 28 31 29 C29.5 22 29 14 32 6 Z"/>
+    <path fill="#FFD43B" d="M32 31 C35.5 35 39 39 39 44.5 C39 49.5 36 52 32 52 C28 52 25 49.5 25 45 C25 40 29 37 32 31 Z"/>
+  </g>
+</svg>

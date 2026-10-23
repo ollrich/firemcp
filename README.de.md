@@ -1,5 +1,7 @@
 # FireMCP
 
+<img src="firefox-extension/icons/icon-128.png" alt="" width="96" align="right">
+
 [![Release](https://img.shields.io/github/v/release/ollrich/firemcp)](https://github.com/ollrich/firemcp/releases/latest)
 [![Lizenz: MIT](https://img.shields.io/github/license/ollrich/firemcp)](LICENSE)
 

@@ -83,15 +83,15 @@
         },
         {
             "name": "read-page-meta",
-            "description": "Read meta tags, JSON-LD and headings of a tab (extension 2.0)"
+            "description": "Read meta tags, JSON-LD and headings of a tab (FireMCP add-on)"
         },
         {
             "name": "read-selection",
-            "description": "Read the text selected in a tab (extension 2.0)"
+            "description": "Read the text selected in a tab (FireMCP add-on)"
         },
         {
             "name": "search-bookmarks",
-            "description": "Search bookmarks with folder paths (extension 2.0)"
+            "description": "Search bookmarks with folder paths (FireMCP add-on)"
         },
         {
             "name": "open-browser-tab",

@@ -143,7 +143,9 @@ registerTool(
     const summary =
       total === 0
         ? `No open tabs${match ? ` match "${match}"` : ""}.`
-        : `Showing tabs ${offset + 1}-${offset + page.length} of ${total}${match ? ` matching "${match}"` : ""}` +
+        : page.length === 0
+          ? `No tabs at offset=${offset}; there are ${total}${match ? ` matching "${match}"` : ""}.`
+          : `Showing tabs ${offset + 1}-${offset + page.length} of ${total}${match ? ` matching "${match}"` : ""}` +
           (hasMore ? ` (use offset=${offset + effectiveLimit} to see more)` : "");
     const lines = page.map((tab) => {
       const lastAccessed = tab.lastAccessed ? dayjs(tab.lastAccessed).fromNow() : "unknown";
@@ -236,7 +238,7 @@ registerTool(
   `,
   {
     tabId: z.number(),
-    offset: z.number().default(0),
+    offset: z.number().int().min(0).default(0),
     includeLinks: z.boolean().default(true).describe("Set false to skip the link list"),
   },
   READS_WEB,
@@ -400,10 +402,10 @@ registerTool(
 );
 
 // ---------------------------------------------------------------------------
-// Workflow tools (fork additions). They only combine the original extension
-// commands open-tab, get-tab-list, get-tab-content and close-tabs, so they work
-// with the stock Firefox add-on from addons.mozilla.org and through broker
-// forwarding.
+// Reading tools. They build on the commands every add-on version knows (open-tab,
+// get-tab-list, get-tab-content, close-tabs), so they also work with the original
+// Browser Control MCP add-on; options only the FireMCP add-on honours are noted
+// in the reply when they had no effect.
 // ---------------------------------------------------------------------------
 
 type TextContent = { type: "text"; text: string };
@@ -450,19 +452,19 @@ const slimParams = {
   format: z
     .enum(["text", "markdown"])
     .default("text")
-    .describe("markdown keeps headings, lists, links, tables and code blocks (extension 2.0; the stock add-on sends text)"),
+    .describe("markdown keeps headings, lists, links, tables and code blocks (FireMCP add-on; the original add-on sends text)"),
   mainContentOnly: z
     .boolean()
     .default(false)
-    .describe("Only the page's main or article element, without menus and footers (extension 2.0)"),
+    .describe("Only the page's main content, without navigation, sidebars and search boxes (FireMCP add-on)"),
   selector: z
     .string()
     .optional()
-    .describe("CSS selector: read only this element, e.g. '#comments' or 'article' (extension 2.0)"),
+    .describe("CSS selector: read only this element, e.g. '#comments' or 'article' (FireMCP add-on)"),
   excludeSelector: z
     .string()
     .optional()
-    .describe("CSS selector of elements to leave out, e.g. 'aside, .ads' (extension 2.0)"),
+    .describe("CSS selector of elements to leave out, e.g. 'aside, .ads' (FireMCP add-on)"),
   redactPersonalData: z
     .boolean()
     .default(false)
@@ -499,7 +501,7 @@ interface OpenReadOptions extends SlimReadOptions {
   timeoutMs: number;
   closeAfter: boolean;
   waitForText?: string;
-  // Open without switching to the tab (extension 2.0; the stock add-on ignores it).
+  // Open without switching to the tab (FireMCP add-on; the original add-on ignores it).
   background?: boolean;
 }
 
@@ -712,10 +714,10 @@ function formatTabContent(
     );
   }
   if (opts.format === "markdown" && !markdown) {
-    notes.push("Markdown needs extension 2.0; the connected add-on sent plain text.");
+    notes.push("Markdown needs the FireMCP add-on; the connected add-on sent plain text.");
   }
-  if ((opts.selector || opts.excludeSelector) && !content.scoped) {
-    notes.push("Selectors need extension 2.0; the connected add-on sent the whole page.");
+  if ((opts.selector || opts.excludeSelector || opts.mainContentOnly) && !content.scoped) {
+    notes.push("selector, excludeSelector and mainContentOnly need the FireMCP add-on; the connected add-on sent the whole page.");
   }
   if (opts.includeLinks && slim.droppedLinks > 0) {
     notes.push(`${slim.droppedLinks} duplicate or surplus links omitted.`);
@@ -747,6 +749,9 @@ async function openAndRead(
   let keepOpen = !opts.closeAfter;
   try {
     const { loaded, tab: loadedTab } = await waitForTabComplete(tabId, opts.timeoutMs);
+    if (loadedTab.url === "about:blank") {
+      throw new Error(`${url} did not start loading within timeoutMs=${opts.timeoutMs} ms.`);
+    }
     if (opts.settleMs > 0) await sleep(opts.settleMs);
 
     let read: { content: TabContentExtensionMessage; textFound?: boolean };
@@ -1094,8 +1099,8 @@ async function requireExtensionCommand(command: string, feature: string): Promis
   if (info?.commands.includes(command)) return;
   throw new Error(
     info
-      ? `${feature} needs a newer Firefox Control extension; the connected version ${info.version} does not support it.`
-      : `${feature} needs the Firefox Control extension 2.0. The connected add-on is the stock one from addons.mozilla.org, which does not support it.`
+      ? `${feature} needs a newer FireMCP add-on; the connected version ${info.version} does not support it.`
+      : `${feature} needs the FireMCP add-on. The connected add-on is the original Browser Control MCP from addons.mozilla.org, which does not support it.`
   );
 }
 
@@ -1123,7 +1128,7 @@ registerTool(
   "read-page-meta",
   `Read a tab's metadata instead of its text: title, meta description, canonical URL,
    robots, Open Graph and Twitter tags, hreflang alternates, JSON-LD structured data and
-   the h1 to h3 outline. The tab is chosen like in read-tab. Needs extension 2.0.`,
+   the h1 to h3 outline. The tab is chosen like in read-tab. Needs the FireMCP add-on.`,
   {
     match: z.string().optional().describe("URL or title fragment of the tab, as in read-tab"),
     tabId: z.number().optional(),
@@ -1151,7 +1156,7 @@ registerTool(
 registerTool(
   "read-selection",
   `Read the text the user has selected in a tab (default: the active tab), for example
-   when they say "this paragraph" or "what I marked". Needs extension 2.0.`,
+   when they say "this paragraph" or "what I marked". Needs the FireMCP add-on.`,
   {
     match: z.string().optional().describe("URL or title fragment of the tab, as in read-tab"),
     tabId: z.number().optional(),
@@ -1178,7 +1183,7 @@ registerTool(
 registerTool(
   "search-bookmarks",
   `Search the user's bookmarks by words in title or URL; returns title, URL, folder and
-   date added. The first use asks the user for the bookmarks permission. Needs extension 2.0.`,
+   date added. The first use asks the user for the bookmarks permission. Needs the FireMCP add-on.`,
   {
     query: z.string().min(1),
     limit: z.number().int().min(1).max(200).default(50),
@@ -1229,7 +1234,7 @@ registerTool(
     background: z
       .boolean()
       .optional()
-      .describe("Open without switching to the tab. Default: true with closeAfter. Needs extension 2.0, the stock add-on always switches."),
+      .describe("Open without switching to the tab. Default: true with closeAfter. Needs the FireMCP add-on, the original add-on always switches."),
     ...slimParams,
   },
   OPENS_PAGES,

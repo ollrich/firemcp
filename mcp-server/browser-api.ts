@@ -65,7 +65,7 @@ export function buildPortInUseMessage(port: number): string {
   );
 }
 
-// Optional get-tab-content fields of extension 2.0; the stock add-on ignores them.
+// Optional get-tab-content fields of the FireMCP add-on; the original add-on ignores them.
 export interface ContentOptions {
   includeLinks?: boolean;
   format?: "text" | "markdown";

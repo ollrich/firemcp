@@ -502,14 +502,14 @@ test("temporary tabs open in the background and links are only requested when wa
 test("markdown falls back to text on the stock add-on with a note", async () => {
   const res = await leader.callTool({ name: "read-tab", arguments: { tabId: 2, format: "markdown" } });
   const text = textOf(res);
-  assert.match(text, /Markdown needs extension 2\.0; the connected add-on sent plain text\./);
+  assert.match(text, /Markdown needs the FireMCP add-on; the connected add-on sent plain text\./);
   assert.match(text, /Bookmarks list/);
 });
 
 test("selectors fall back to the whole page on the stock add-on with a note", async () => {
   const res = await leader.callTool({ name: "read-tab", arguments: { tabId: 2, selector: "#stats" } });
   const text = textOf(res);
-  assert.match(text, /Selectors need extension 2\.0; the connected add-on sent the whole page\./);
+  assert.match(text, /selector, excludeSelector and mainContentOnly need the FireMCP add-on; the connected add-on sent the whole page\./);
   assert.match(text, /Bookmarks list/);
 });
 
@@ -521,7 +521,7 @@ test("extension 2.0 tools explain what they need on the stock add-on", async () 
   ]) {
     const res = await leader.callTool({ name, arguments: args });
     assert.equal(res.isError, true, name);
-    assert.match(textOf(res), /needs the Firefox Control extension 2\.0\. The connected add-on is the stock one/, name);
+    assert.match(textOf(res), /needs the FireMCP add-on\. The connected add-on is the original Browser Control MCP/, name);
   }
 });
 
@@ -572,7 +572,7 @@ test("extension 2.0 tools work against an own build", async () => {
     res = await leader.callTool({ name: "read-tab", arguments: { tabId: 2, selector: "#stats" } });
     text = textOf(res);
     assert.match(text, /42 bookmarks saved/);
-    assert.doesNotMatch(text, /Selectors need extension 2\.0/);
+    assert.doesNotMatch(text, /need the FireMCP add-on/);
     res = await leader.callTool({ name: "read-tab", arguments: { tabId: 2, selector: "#missing" } });
     assert.equal(res.isError, true);
     assert.match(textOf(res), /No element matches the selector "#missing"/);

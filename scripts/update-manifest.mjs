@@ -3,6 +3,7 @@
 // release asset into firefox-extension/web-ext-artifacts/release/.
 //
 // Usage: npm run release:updates -- firefox-extension/web-ext-artifacts/<signed>.xpi
+import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -18,6 +19,12 @@ if (!signedXpi || !fs.existsSync(signedXpi)) {
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "firefox-extension", "manifest.json"), "utf8"));
 const { id } = manifest.browser_specific_settings.gecko;
 const { version } = manifest;
+// A signed file of another version would point updates.json at the wrong build.
+const signed = JSON.parse(execFileSync("unzip", ["-p", signedXpi, "manifest.json"], { encoding: "utf8" }));
+if (signed.version !== version || signed.browser_specific_settings?.gecko?.id !== id) {
+  console.error(`${signedXpi} is ${signed.browser_specific_settings?.gecko?.id} ${signed.version}, the repo is at ${id} ${version}.`);
+  process.exit(1);
+}
 const assetName = `firemcp-${version}.xpi`;
 const releaseDir = path.join(root, "firefox-extension", "web-ext-artifacts", "release");
 fs.mkdirSync(releaseDir, { recursive: true });

@@ -2,7 +2,11 @@
 
 Versions follow [Semantic Versioning](https://semver.org/); the add-on, the MCP server and the Claude Desktop extension share one version number.
 
-## Unreleased
+## 2.2.0 (2026-10-23)
+
+### Added
+
+- New logo: a flame between angle brackets, for the add-on and the Claude Desktop extension.
 
 ### Fixed
 

@@ -729,9 +729,10 @@ function formatTabContent(
   // Offsets count raw page characters, so continue after the raw text shown.
   const end = offset + slim.rawConsumed;
 
+  // Some clients join the text blocks of a reply without a separator.
   const header: TextContent = {
     type: "text",
-    text: `${formatTabLine(tab)}, characters ${offset}-${end} of ${content.totalLength}`,
+    text: `${formatTabLine(tab)}, characters ${offset}-${end} of ${content.totalLength}\n`,
   };
   const notes: string[] = [];
   if (slim.cutByMaxChars || content.isTruncated) {

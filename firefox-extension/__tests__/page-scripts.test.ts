@@ -112,4 +112,16 @@ describe("page scripts", () => {
     expect(trimmed).not.toContain("| Name |");
     expect(trimmed).toContain("1. First");
   });
+
+  it("keeps the structure of blocks inside custom elements and inline wrappers", () => {
+    document.body.innerHTML = `
+      <turbo-frame id="content"><h2>Release</h2><release-body><p>Intro</p><ul><li>One</li><li>Two</li></ul></release-body></turbo-frame>
+      <p>Card: <a href="https://example.com/c"><div>Card title</div></a> <span>stays inline</span></p>`;
+    const markdown = new Function("root", "exclude", "links", `return (${pageToMarkdown.toString()})(root, exclude, links)`)(
+      document.body,
+      null,
+      false
+    ) as string;
+    expect(markdown).toBe(["## Release", "Intro", "- One\n- Two", "Card:", "Card title", "stays inline"].join("\n\n"));
+  });
 });

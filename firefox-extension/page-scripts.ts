@@ -93,6 +93,11 @@ export function pageToMarkdown(root: HTMLElement, exclude: string | null, inline
     "FIGURE", "FOOTER", "FORM", "H1", "H2", "H3", "H4", "H5", "H6", "HEADER", "HR", "LI", "MAIN", "NAV", "OL", "P",
     "PRE", "SECTION", "SUMMARY", "TABLE", "UL",
   ]);
+  // Custom elements (GitHub's <turbo-frame>, Reddit's <shreddit-post>) and inline
+  // wrappers such as a link around a card can hold blocks; walk those as blocks so
+  // their headings, paragraphs and lists keep their structure.
+  const BLOCK_SELECTOR = Array.from(BLOCK).join(",");
+  const isBlock = (element: Element) => BLOCK.has(element.tagName) || element.querySelector(BLOCK_SELECTOR) !== null;
   const isHidden = (element: Element): boolean => {
     if ((element as HTMLElement).hidden || element.getAttribute("aria-hidden") === "true") return true;
     const checkVisibility = (element as HTMLElement & { checkVisibility?: () => boolean }).checkVisibility;
@@ -190,7 +195,7 @@ export function pageToMarkdown(root: HTMLElement, exclude: string | null, inline
 
     let run = "";
     for (const child of Array.from(element.childNodes)) {
-      if (child.nodeType === Node.ELEMENT_NODE && BLOCK.has((child as Element).tagName)) {
+      if (child.nodeType === Node.ELEMENT_NODE && isBlock(child as Element)) {
         push(run, innerQuote);
         run = "";
         walk(child as HTMLElement, innerQuote);

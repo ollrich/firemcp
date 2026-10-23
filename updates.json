@@ -3,6 +3,11 @@
     "firemcp@ollrich": {
       "updates": [
         {
+          "version": "2.0.1",
+          "update_link": "https://github.com/ollrich/firemcp/releases/download/v2.0.1/firemcp-2.0.1.xpi",
+          "update_hash": "sha256:e274b9f80c722b0ab2cf52da975c7a18eb5ce8b4c5d1ac297a68194270416fd2"
+        },
+        {
           "version": "2.0.0",
           "update_link": "https://github.com/ollrich/firemcp/releases/download/v2.0.0/firemcp-2.0.0.xpi",
           "update_hash": "sha256:07008ab65b65952e739e4b4c7fbe9e78797980e4931f7cd12f53fe3cbcd618ab"
